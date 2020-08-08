@@ -1,0 +1,27 @@
+:icons: font
+ifdef::env-github,env-browser[:outfilesuffix: .adoc]
+image::https://docs.featurehub.io/images/fh_primary_navy.png[Feature Hub,500]
+
+FeatureHub is a Cloud Native platform to help software teams manage their features, from feature flags (also known as feature toggles) to A/B experiments and remote or centralised configuration.
+It's an essential ingredient for enabling the feedback loop and feature testing and experimentation in production with real users.
+
+== Examples
+The SDK Examples consist of two variants
+
+- link:todo-backend-java/README{outfilesuffix}[Java backend server]
+- link:todo-backend-typescript/README{outfilesuffix}[Typescript backend server]
+
+Both of these will work for the link:todo-frontend-react-typescript/README{outfilesuffix}[React frontend] (which also uses features).
+
+
+== Running from the Docker image
+
+The examples are available in nodejs form, which makes it easier to explore.
+
+Please see our https://www.youtube.com/watch?v=DRVqXJmbvTk[Youtube Video] for details on how to run these in the Docker images.
+
+----
+docker run -e 
+FEATUREHUB_APP_ENV_URL=http://192.168.86.49:8903/features/default/d8ba747d-7d3c-4454-9c58-130390848412/5EE3vua1NqY0ez6Zd4TXU7XnsZdAPHtR96XaDmhfegitKGiQ9aCdmtmeNUNPubkRZLJLUUpaC7b05ELk
+-p 5000:5000  featurehub/example_node:1.1
+----
