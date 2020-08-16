@@ -15,7 +15,38 @@ Uses the `client-typescript-eventsource` library.
 
 The app is based on the Open API description stored in todo-api folder, however Open API code generators are not used in this case
 
-In addition, it demonstrates integration with Google Analytics.You will require to have valid GA Tracking ID, e.g. 'UA-XXXXXXXXX-X'.
+In addition, it demonstrates integration with Google Analytics.
+
+== Prerequisites
+
+* Node @12 or higher
+
+* You need to setup a feature of type "Feature flag - boolean" in the FeatureHub Admin Console.
+Set feature key to "FEATURE_TITLE_TO_UPPERCASE".
+
+image::https://docs.featurehub.io/images/create-feature-title.png[Feature demo,800]
+
+* You are required to have a Service Account created in the FeatureHub Admin Console with the "read" permissions for your desired environment.
+Once this is set, copy the SDK URL from the Service Accounts page for your desired environment and set it as an environment variable:
+
+You need to append at the front of it the edge url and it's port, like this `'http://[featurehub-edge-url]:[featurehub-edge-port]/features/[copied-sdk-url]`
+
+For example: `http://your-server:8553/features/default/4e439d38-1e87-4e77-84c3-2a32c112cfc5/Fpy5YpEfTeR5yQ15DUWEyvpQyfpjKHefMq9QhlodNzN8XH4by048X9Vjlj94fPieNc5nkagdfVoeAJxM`
+
+Note, the port will depend on which FeatureHub installation you are running.
+If you are running SSE by itself, or the Docker with "all-separate-postgres" it will default to 8553. If you are running Party Server, it will be 8903, if you are running Docker with All-In-One-h2 it will be 8085
+
+Set SDK Url as your env variable, e.g by running this command:
+
+`export FEATUREHUB_APP_ENV_URL=http://your-server:8553/features/default/4e439d38-1e87-4e77-84c3-2a32c112cfc5/Fpy5YpEfTeR5yQ15DUWEyvpQyfpjKHefMq9QhlodNzN8XH4by048X9Vjlj94fPieNc5nkagdfVoeAJxM`
+
+Alternatively, you can set it in the ```run.sh``` file and run this script to kick off the back-end server.
+
+* If you like to see events fire in your Google Analytics, you will require to have valid GA Tracking ID, e.g. 'UA-XXXXXXXXX-X'.
+
+You also need to specify a CID - a customer id this is associate with GA. In this example it is set to a random number.
+
+Read more about CID https://stackoverflow.com/questions/14227331/what-is-the-client-id-when-sending-tracking-data-to-google-analytics-via-the-mea[here]
 
 GA events:
 
@@ -25,40 +56,15 @@ GA events:
 
 Once you launch the server, any call to "add" or "delete" to-do will generate a GA event accordingly.
 
-Note: The events will appear in your GA console with ~12 hours delay.
-
-More on GA integration can be found here https://docs.featurehub.io/#_google_analytics_integration
-
-== Prerequisites 
-
-Node @12 or higher
-
-Follow readme instructions to build  `client-typescript-core` module
-
-Follow readme instructions to build  `client-typescript-eventsource` module
-
-You need to setup a feature of type "Feature flag - boolean" in the FeatureHub Web app.
-Use the feature key provided above.
-
-image::https://docs.featurehub.io/images/create-feature-title.png[Feature demo,800]
-
-You are required to have a Service Account created in the FeatureHub Web app with the "read" permissions for your desired environment.
-Once this is set, copy the SDK URL for your desired environment and set it as an environment variable:
-
-e.g. `'http://your-featurehub-url:8903/features/default/ff8635ef-ed28-4cc3-8067-b9ffd8882100/lOopBkGPALBcI0p6AGpf4jAdUi2HxR0RkhYvV00i1XsMQLWkltaoFvEfs7uFsZaQ45kF5FmhGE7rWTSg'`
-
-to be set in your run configuration as:
-
-`process.env.FEATUREHUB_APP_ENV_URL`
-
-Note, the "your-featurehub-url" and port will depend on which server you are running.
-If you are running SSE by itself, or the Docker with "all-separate-postgres" it will default to 8553. If you are running Party Server, it will be 8903, if you are running Docker with All-In-One-h2 it will be 8085
+More on GA integration can be found here https://docs.featurehub.io/analytics.html
 
 == Installation Instructions
 
 ----
 npm install && npm run-script start
 ----
+
+You should see `"Features are available, starting server..."` message in the console. If no message shows up, it is likely the SDK Url is incorrect.
 
 once the app is running, you should be able to do:
 
@@ -80,6 +86,6 @@ http://0.0.0.0:8099/todo/list \
 -H 'cache-control: no-cache'
 ----
 
-Watch how "title" value in the response changes from lower case to upper case when you turn feature on/off from the admin console 
+Watch how "title" value in the response changes from lower case to upper case when you turn feature on/off from the FeatureHub Admin Console
 
 

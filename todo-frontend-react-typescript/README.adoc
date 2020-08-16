@@ -7,23 +7,32 @@ Demonstrates the feature of "STRING" type that controls the colour of a "SUBMIT"
 In addition, it demonstrates integration with Google Analytics. You will require to have valid GA Tracking ID, e.g. 'UA-XXXXXXXXX-X',
 and so  the code is currently commented out.
 
-=== Configuration
+=== Pre-requisites
 
-The application requires a host which will be the backend and also an SDK URL before it can properly function. Once
-you have these, you need to specify them in the `public/featurehub-config.json` file and the application will load
+* Node @12 or higher
+
+* You need to setup a feature of type "Feature flag - string" in the FeatureHub Admin Console.
+Set feature key to `SUBMIT_COLOR_BUTTON`.
+
+* You are required to have a Service Account created in the FeatureHub Admin Console with the "read" permissions for your desired environment.
+Once this is set, copy the SDK URL from the Service Accounts page for your desired environment and set it as an environment variable:
+
+You need to append at the front of it the edge url and it's port, like this `'http://[featurehub-edge-url]:[featurehub-edge-port]/features/[copied-sdk-url]`
+
+For example: `http://your-server:8553/features/default/4e439d38-1e87-4e77-84c3-2a32c112cfc5/Fpy5YpEfTeR5yQ15DUWEyvpQyfpjKHefMq9QhlodNzN8XH4by048X9Vjlj94fPieNc5nkagdfVoeAJxM` 
+
+Note, the port will depend on which FeatureHub installation you are running.
+If you are running SSE by itself, or the Docker with "all-separate-postgres" it will default to 8553. If you are running Party Server, it will be 8903, if you are running Docker with All-In-One-h2 it will be 8085
+
+You need to specify them in the `public/featurehub-config.json` file and the application will load
 them. This is not particularly a recommended practice, it is simply easy for us to use when running in a docker
 environment rather than having to search/replace in a large js file.
 
-Requirements:
+* If you like to see events fire in your Google Analytics, you will require to have valid GA Tracking ID, e.g. 'UA-XXXXXXXXX-X'.
 
-* Feature key: `SUBMIT_COLOR_BUTTON` - this can be configured after you create the Application and Environment to 
-demonstrate that the application will listen even when the feature does not exist.
-* SDK URL, fully resolved depending on where you are running the SSE Edge Server
-* Backend URL (which must be CORS enabled, both the Java and Typescript ones are) full resolved.
+You also need to specify a CID - a customer id this is associate with GA. In this example it is set to a random number.
 
-If you also want GA-events, you need to have:
-
-* GA-ID - in the form of UA-XXXXX. We specify a random CID as we have no user data, it does not matter.
+Read more about CID https://stackoverflow.com/questions/14227331/what-is-the-client-id-when-sending-tracking-data-to-google-analytics-via-the-mea[here]
 
 GA events:
 
@@ -31,19 +40,10 @@ GA events:
 
 `name: "todo-delete", value: "5"`
 
-Once you launch the app, any interaction with "add" or "delete" buttons will generate a GA event accordingly. 
+Once you launch the app, any interaction with "add" or "delete" buttons will generate a GA event accordingly.
 
-Note: The events will appear in your GA console with ~12 hours delay.
+More on GA integration can be found here https://docs.featurehub.io/analytics.html
 
-More on GA integration can be found here https://docs.featurehub.io/#_google_analytics_integration
-
-
-== Prerequisites 
-Node @12 or higher  
-
-Follow readme instructions to build  `client-typescript-core` module
-
-Follow readme instructions to build  `client-typescript-eventsource` module
 
 == Installation Instructions
 
@@ -55,19 +55,18 @@ Generate AXIOS openapi client
 
 `mvn clean generate-sources`
 
-Link to local versions of feature-hub repositories
 
-`npm run-script local-link`
+Run the back-end server: 
 
-Run back-end server: 
+`cd ../todo-backend-typescript`
 
-`cd ./todo-backend-typescript` 
+provide your SDK Url in `run.sh` file (this is required as backened server example also connects to FeatureHub for demo purposes)  
 
 `npm install && npm run-script start`
 
 After back-end server has started successfully:
 
-`cd ./todo-frontend-react-typescript`
+`cd ../todo-frontend-react-typescript`
 
 `npm run-script compile`
 

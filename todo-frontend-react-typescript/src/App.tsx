@@ -3,12 +3,11 @@ import { Configuration, DefaultApi, Todo } from './api';
 import './App.css';
 import globalAxios from 'axios';
 import {
-  FeatureContext,
-  featureHubRepository,
-  // GoogleAnalyticsCollector,
-  Readyness,
-  FeatureUpdater,
-  FeatureHubPollingClient
+    FeatureContext,
+    featureHubRepository,
+    Readyness,
+    FeatureUpdater,
+    FeatureHubPollingClient, FeatureStateHolder, GoogleAnalyticsCollector
 } from 'featurehub-repository/dist';
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
 
@@ -25,8 +24,8 @@ window.PollingService = FeatureHubPollingClient;
 window.Repository = featureHubRepository;
 
 let todoApi: DefaultApi;
-// const todoApi = new DefaultApi(new Configuration({basePath:
-//     baseUrl === 'UNKNOWN_BASE' ? 'http://localhost:8099' : baseUrl }));
+
+let initialized = false;
 
 class TodoData {
   todos: Array<Todo>;
@@ -73,20 +72,24 @@ class App extends React.Component<{}, { todos: TodoData }> {
   }
 
   async initializeFeatureHub() {
-    featureHubRepository.addReadynessListener((readyness) => {
-      console.log('readyness', readyness);
-      if (readyness === Readyness.Ready) {
-        const color = featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').getString();
-        this.setState({todos: this.state.todos.changeColor(color)});
-      }
-    });
+          featureHubRepository.addReadynessListener((readyness) => {
+              if (!initialized) {
+                  console.log('readyness', readyness);
+                  if (readyness === Readyness.Ready) {
+                      initialized = true;
+                      const color = featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').getString();
+                      this.setState({todos: this.state.todos.changeColor(color)});
+                  }
+              }
+          });
 
-    featureHubRepository
-      .addPostLoadNewFeatureStateAvailableListener((_) =>
-                                                   this.setState(
-                                                     {todos: this.state.todos.changeFeaturesUpdated(true)}) );
+     //Using catch & release mechanism
+    // featureHubRepository
+    //   .addPostLoadNewFeatureStateAvailableListener((_) =>
+    //                                                this.setState(
+    //                                                  {todos: this.state.todos.changeFeaturesUpdated(true)}) );
 
-    featureHubRepository.catchAndReleaseMode = true; // don't allow feature updates to come through
+    // featureHubRepository.catchAndReleaseMode = true; // catch feature updates and release later
 
     // load the config from the config json file
     const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
@@ -94,14 +97,14 @@ class App extends React.Component<{}, { todos: TodoData }> {
     todoApi = new DefaultApi(new Configuration({basePath: config.baseUrl }));
     this._loadInitialData(); // let this happen in background
 
-    // listen for reatures from configured source
+    // listen for features from the specified SDK Url for a given environment
     this.eventSource = new FeatureHubEventSourceClient(config.sdkUrl);
     this.eventSource.init();
 
-    // alternative if you want to ready to incoming feature changes and not wait for a page refresh
-    // featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
-    //   this.setState({todos: this.state.todos.changeColor(fs.getString())});
-    // });
+    // react to incoming feature changes in real-time
+    featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
+      this.setState({todos: this.state.todos.changeColor(fs.getString())});
+    });
 
     // featureHubRepository.addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
   }
