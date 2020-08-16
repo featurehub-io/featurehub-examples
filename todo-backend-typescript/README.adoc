@@ -44,6 +44,8 @@ Set SDK Url in your run configuration as:
 
 You also need to specify a CID - a customer id this is associate with GA. In this example it is set to a random number.
 
+Read more about CID https://stackoverflow.com/questions/14227331/what-is-the-client-id-when-sending-tracking-data-to-google-analytics-via-the-mea[here]
+
 GA events:
 
 `name: "todo-add", value: "10"`

@@ -5,7 +5,6 @@
   "license": "MIT",
   "scripts": {
     "build": "node_modules/.bin/tsc",
-    "compile": "npm run build && cp package.json dist && cd dist",
     "start": "npm run build && node dist/app.js"
   },
   "dependencies": {

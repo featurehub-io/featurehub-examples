@@ -106,7 +106,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
       this.setState({todos: this.state.todos.changeColor(fs.getString())});
     });
 
-    featureHubRepository.addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
+    // featureHubRepository.addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
   }
 
   async componentDidMount() {
