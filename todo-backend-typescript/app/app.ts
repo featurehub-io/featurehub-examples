@@ -88,12 +88,15 @@ todoRouter.registerRoutes();
 
 process.on('SIGINT', () => { console.log('closing FH client'); api.close(() => featureHubEventSourceClient.close()); });
 
+let initialized = false;
 featureHubRepository.addReadynessListener((ready) => {
+   if (!initialized) {
   if (ready == Readyness.Ready) {
     console.log("Features are available, starting server...");
-
-    api.listen(port, function () {
-      console.log('server is listening on port', port);
-    });
-  }
+      initialized = true;
+      api.listen(port, function () {
+        console.log('server is listening on port', port);
+      });
+    }
+   }
 });
