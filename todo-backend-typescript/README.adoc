@@ -36,9 +36,11 @@ For example: `http://your-server:8553/features/default/4e439d38-1e87-4e77-84c3-2
 Note, the port will depend on which FeatureHub installation you are running.
 If you are running SSE by itself, or the Docker with "all-separate-postgres" it will default to 8553. If you are running Party Server, it will be 8903, if you are running Docker with All-In-One-h2 it will be 8085
 
-Set SDK Url in your run configuration as:
+Set SDK Url as your env variable, e.g by running this command:
 
-`process.env.FEATUREHUB_APP_ENV_URL`
+`export FEATUREHUB_APP_ENV_URL=http://your-server:8553/features/default/4e439d38-1e87-4e77-84c3-2a32c112cfc5/Fpy5YpEfTeR5yQ15DUWEyvpQyfpjKHefMq9QhlodNzN8XH4by048X9Vjlj94fPieNc5nkagdfVoeAJxM`
+
+Alternatively, you can set it in the ```run.sh``` file and run this script to kick off the back-end server.
 
 * If you like to see events fire in your Google Analytics, you will require to have valid GA Tracking ID, e.g. 'UA-XXXXXXXXX-X'.
 
