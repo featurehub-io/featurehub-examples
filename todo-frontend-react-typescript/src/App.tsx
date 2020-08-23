@@ -3,11 +3,14 @@ import { Configuration, DefaultApi, Todo } from './api';
 import './App.css';
 import globalAxios from 'axios';
 import {
-    FeatureContext,
-    featureHubRepository,
-    Readyness,
-    FeatureUpdater,
-    FeatureHubPollingClient, FeatureStateHolder, GoogleAnalyticsCollector
+  FeatureContext,
+  FeatureHubPollingClient,
+  featureHubRepository,
+  FeatureStateHolder,
+  FeatureUpdater,
+  Readyness,
+  StrategyAttributeCountryName,
+  StrategyAttributeDeviceName
 } from 'featurehub-repository/dist';
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
 
@@ -72,6 +75,9 @@ class App extends React.Component<{}, { todos: TodoData }> {
   }
 
   async initializeFeatureHub() {
+    if (featureHubRepository.readyness === Readyness.Ready || this.eventSource) {
+      return;
+    }
           featureHubRepository.addReadynessListener((readyness) => {
               if (!initialized) {
                   console.log('readyness', readyness);
@@ -83,13 +89,18 @@ class App extends React.Component<{}, { todos: TodoData }> {
               }
           });
 
-     //Using catch & release mechanism
+    // Using catch & release mechanism
     // featureHubRepository
     //   .addPostLoadNewFeatureStateAvailableListener((_) =>
     //                                                this.setState(
     //                                                  {todos: this.state.todos.changeFeaturesUpdated(true)}) );
 
     // featureHubRepository.catchAndReleaseMode = true; // catch feature updates and release later
+
+    featureHubRepository.config.userKey('auntie')
+      .country(StrategyAttributeCountryName.NewZealand)
+      .device(StrategyAttributeDeviceName.Browser)
+      .build();
 
     // load the config from the config json file
     const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
