@@ -5,14 +5,20 @@ image::https://docs.featurehub.io/images/fh_primary_navy.png[Feature Hub,500]
 FeatureHub is a Cloud Native platform to help software teams manage their features, from feature flags (also known as feature toggles) to A/B experiments and remote or centralised configuration.
 It's an essential ingredient for enabling the feedback loop and feature testing and experimentation in production with real users.
 
-== Examples
+== Versions
+
+The master branch on this repository always reflects the functional master branch on the main `featurehub` repository.
+As such, if you are running against version (say) `0.0.7` of our Docker images, then you should download the
+0.0.7+ of the https://github.com/featurehub-io/featurehub-examples/tags[examples].
+
+== The SDK Examples
+
 The SDK Examples consist of two variants
 
 - link:todo-backend-java/README{outfilesuffix}[Java backend server]
 - link:todo-backend-typescript/README{outfilesuffix}[Typescript backend server]
 
 Both of these will work for the link:todo-frontend-react-typescript/README{outfilesuffix}[React frontend] (which also uses features).
-
 
 == Running from the Docker image
 
