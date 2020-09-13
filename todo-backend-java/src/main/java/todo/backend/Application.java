@@ -14,6 +14,8 @@ import io.featurehub.client.interceptor.OpenTracingValueInterceptor;
 import io.featurehub.client.interceptor.SystemPropertyValueInterceptor;
 import io.featurehub.client.jersey.GoogleAnalyticsJerseyApiClient;
 import io.featurehub.client.jersey.JerseyClient;
+import io.featurehub.sse.model.StrategyAttributeDeviceName;
+import io.featurehub.sse.model.StrategyAttributePlatformName;
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -48,6 +50,12 @@ public class Application {
     cfr.registerValueInterceptor(true, new SystemPropertyValueInterceptor());
     cfr.registerValueInterceptor(false, new OpenTracingValueInterceptor());
     cfr.addAnalyticCollector(new GoogleAnalyticsCollector(analyticsKey, analyticsCid, new GoogleAnalyticsJerseyApiClient()));
+
+    cfr.clientContext()
+      .device(StrategyAttributeDeviceName.SERVER)
+      .platform(StrategyAttributePlatformName.LINUX)
+      .attr("language", "java")
+      .build();
 
     StaticFeatureContext.repository = cfr;
     new JerseyClient(featureHubUrl, true, cfr);

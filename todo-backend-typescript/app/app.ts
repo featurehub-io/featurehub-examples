@@ -2,7 +2,7 @@ import * as restify from 'restify';
 import * as corsMiddleware from 'restify-cors-middleware';
 import { ITodoApiController, Todo, TodoApiRouter } from "./generated-interface";
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
-import {FeatureContext, featureHubRepository, GoogleAnalyticsCollector, Readyness} from 'featurehub-repository/dist';
+import {FeatureContext, featureHubRepository, GoogleAnalyticsCollector, Readyness, StrategyAttributeCountryName, StrategyAttributeDeviceName, StrategyAttributePlatformName} from 'featurehub-repository/dist';
 
 if (process.env.FEATUREHUB_APP_ENV_URL === undefined) {
   console.error('You must define the location of your feature hub SDK URL in the environment variable FEATUREHUB_APP_ENV_URL');
@@ -15,6 +15,11 @@ const featureHubEventSourceClient  = new FeatureHubEventSourceClient(process.env
 featureHubEventSourceClient.init();
 // featureHubRepository.addAnalyticCollector(new GoogleAnalyticsCollector('UA-XXXYYYYY', '1234-5678-abcd-1234'));
 
+featureHubRepository.clientContext
+	.country(StrategyAttributeCountryName.NewZealand)
+	.device(StrategyAttributeDeviceName.Server)
+	.platform(StrategyAttributePlatformName.Macos)
+	.build();
 
 const api = restify.createServer();
 

@@ -97,7 +97,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
 
     // featureHubRepository.catchAndReleaseMode = true; // catch feature updates and release later
 
-    featureHubRepository.config.userKey('auntie')
+    featureHubRepository.clientContext.userKey('auntie')
       .country(StrategyAttributeCountryName.NewZealand)
       .device(StrategyAttributeDeviceName.Browser)
       .build();
