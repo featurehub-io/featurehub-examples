@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Configuration, DefaultApi, Todo } from './api';
 import './App.css';
-import globalAxios from 'axios';
+import globalAxios, { AxiosRequestConfig } from 'axios';
 import {
   FeatureContext,
   FeatureHubPollingClient,
@@ -10,7 +10,8 @@ import {
   FeatureUpdater,
   Readyness,
   StrategyAttributeCountryName,
-  StrategyAttributeDeviceName
+  StrategyAttributeDeviceName,
+  w3cBaggageHeader
 } from 'featurehub-repository/dist';
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
 
@@ -61,6 +62,21 @@ class ConfigData {
   baseUrl: string;
   sdkUrl: string;
 }
+
+globalAxios.interceptors.request.use(function (config: AxiosRequestConfig) {
+  // const baggage = w3cBaggageHeader({repo: featureHubRepository, header: config.headers.Baggage});
+  const baggage = w3cBaggageHeader({});
+  if (baggage) {
+    console.log('baggage is ', baggage);
+    config.headers.Baggage = baggage;
+  } else {
+    console.log('no baggage');
+  }
+  return config;
+}, function (error: any) {
+  // Do something with request error
+  return Promise.reject(error);
+});
 
 class App extends React.Component<{}, { todos: TodoData }> {
   private titleInput: HTMLInputElement;
