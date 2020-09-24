@@ -11,7 +11,7 @@ import {
   Readyness,
   StrategyAttributeCountryName,
   StrategyAttributeDeviceName,
-  w3cBaggageHeader
+  // w3cBaggageHeader
 } from 'featurehub-repository/dist';
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
 
@@ -33,13 +33,13 @@ let initialized = false;
 
 class TodoData {
   todos: Array<Todo>;
-  buttonColour: string | undefined;
+  backgroundColor: string;
   ready: boolean = false;
   featuresUpdated: boolean = false;
 
-  constructor(todos?: Array<Todo>, buttonColour?: string, ready?: boolean) {
+  constructor(todos?: Array<Todo>, backgroundColor?: string, ready?: boolean) {
     this.todos = todos || [];
-    this.buttonColour = buttonColour || 'blue';
+    this.backgroundColor = backgroundColor || 'blue';
     this.ready = ready || false;
   }
 
@@ -48,11 +48,11 @@ class TodoData {
   }
 
   changeTodos(todos: Array<Todo>): TodoData {
-    return new TodoData(todos, this.buttonColour, this.ready);
+    return new TodoData(todos, this.backgroundColor, this.ready);
   }
 
   changeFeaturesUpdated(fu: boolean): TodoData {
-    const td = new TodoData(this.todos, this.buttonColour, this.ready);
+    const td = new TodoData(this.todos, this.backgroundColor, this.ready);
     td.featuresUpdated = fu;
     return td;
   }
@@ -65,13 +65,13 @@ class ConfigData {
 
 globalAxios.interceptors.request.use(function (config: AxiosRequestConfig) {
   // const baggage = w3cBaggageHeader({repo: featureHubRepository, header: config.headers.Baggage});
-  const baggage = w3cBaggageHeader({});
-  if (baggage) {
-    console.log('baggage is ', baggage);
-    config.headers.Baggage = baggage;
-  } else {
-    console.log('no baggage');
-  }
+  // const baggage = w3cBaggageHeader({});
+  // if (baggage) {
+  //   console.log('baggage is ', baggage);
+  //   config.headers.Baggage = baggage;
+  // } else {
+  //   console.log('no baggage');
+  // }
   return config;
 }, function (error: any) {
   // Do something with request error
@@ -80,6 +80,7 @@ globalAxios.interceptors.request.use(function (config: AxiosRequestConfig) {
 
 class App extends React.Component<{}, { todos: TodoData }> {
   private titleInput: HTMLInputElement;
+  private userName: HTMLInputElement;
   private eventSource: FeatureHubEventSourceClient;
 
   constructor() {
@@ -92,6 +93,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
 
   async initializeFeatureHub() {
     if (featureHubRepository.readyness === Readyness.Ready || this.eventSource) {
+      console.log('already initialized');
       return;
     }
           featureHubRepository.addReadynessListener((readyness) => {
@@ -182,15 +184,34 @@ class App extends React.Component<{}, { todos: TodoData }> {
         </div>
       );
     }
-    let buttonStyle = {
-      color: this.state.todos.buttonColour
+    let backgroundColor = {
+      backgroundColor: this.state.todos.backgroundColor
     };
     return (
-      <div className="App">
+      <div className="App" style={backgroundColor}>
         {this.state.todos.featuresUpdated &&
         (<div className="updatedFeatures">There are updated features available.
           <button onClick={() => window.location.reload()}>REFRESH</button></div>)}
         <h1>Todo List</h1>
+        <div className="username">
+        <form>
+          <span>Name</span>
+          <input
+            ref={node => {
+            if (node != null) {
+              this.userName = node; // refresh the
+            }
+          }}
+          />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              featureHubRepository.clientContext.userKey(this.userName.value).build();
+            }}
+          >Set name
+          </button>
+        </form>
+        </div>
         <form
           onSubmit={e => {
             e.preventDefault();
@@ -205,7 +226,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
               }
             }}
           />
-          <button type="submit" style={buttonStyle}>Add</button>
+          <button type="submit">Add</button>
         </form>
         <ul>
           {this.state.todos.todos.map((todo, index) => {

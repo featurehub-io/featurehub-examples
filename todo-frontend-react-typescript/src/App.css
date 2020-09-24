@@ -14,6 +14,12 @@
   color: white;
 }
 
+.username {
+  position: absolute;
+  right: 30px;
+  top: 0px;
+}
+
 .App-intro {
   font-size: large;
 }
