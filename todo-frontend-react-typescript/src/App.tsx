@@ -11,7 +11,9 @@ import {
   Readyness,
   StrategyAttributeCountryName,
   StrategyAttributeDeviceName,
-  // w3cBaggageHeader
+  FeatureHubRepository,
+  LocalSessionInterceptor,
+  w3cBaggageHeader
 } from 'featurehub-repository/dist';
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
 
@@ -20,6 +22,7 @@ declare global {
     FeatureUpdater: any;
     PollingService: any;
     Repository: any;
+    ls: any;
   }
 }
 
@@ -64,19 +67,21 @@ class ConfigData {
 }
 
 globalAxios.interceptors.request.use(function (config: AxiosRequestConfig) {
-  // const baggage = w3cBaggageHeader({repo: featureHubRepository, header: config.headers.Baggage});
+  const baggage = w3cBaggageHeader({repo: featureHubRepository, header: config.headers.Baggage});
   // const baggage = w3cBaggageHeader({});
-  // if (baggage) {
-  //   console.log('baggage is ', baggage);
-  //   config.headers.Baggage = baggage;
-  // } else {
-  //   console.log('no baggage');
-  // }
+  if (baggage) {
+    console.log('baggage is ', baggage);
+    config.headers.Baggage = baggage;
+  } else {
+    console.log('no baggage');
+  }
   return config;
 }, function (error: any) {
   // Do something with request error
   return Promise.reject(error);
 });
+
+var repo: FeatureHubRepository;
 
 class App extends React.Component<{}, { todos: TodoData }> {
   private titleInput: HTMLInputElement;
@@ -96,16 +101,21 @@ class App extends React.Component<{}, { todos: TodoData }> {
       console.log('already initialized');
       return;
     }
-          featureHubRepository.addReadynessListener((readyness) => {
-              if (!initialized) {
-                  console.log('readyness', readyness);
-                  if (readyness === Readyness.Ready) {
-                      initialized = true;
-                      const color = featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').getString();
-                      this.setState({todos: this.state.todos.changeColor(color)});
-                  }
-              }
-          });
+
+    repo = featureHubRepository;
+    const ls = new LocalSessionInterceptor();
+    featureHubRepository.addValueInterceptor(ls);
+
+    featureHubRepository.addReadynessListener((readyness) => {
+        if (!initialized) {
+            console.log('readyness', readyness);
+            if (readyness === Readyness.Ready) {
+                initialized = true;
+                const color = featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').getString();
+                this.setState({todos: this.state.todos.changeColor(color)});
+            }
+        }
+    });
 
     // Using catch & release mechanism
     // featureHubRepository
@@ -124,6 +134,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
     const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
     // setup the api
     todoApi = new DefaultApi(new Configuration({basePath: config.baseUrl }));
+    ls.setUrl(config.sdkUrl); // this tells the flutter iframe (if it is included) where the sdk url is
     this._loadInitialData(); // let this happen in background
 
     // listen for features from the specified SDK Url for a given environment
@@ -131,7 +142,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
     this.eventSource.init();
 
     // react to incoming feature changes in real-time
-    featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
+    repo.feature('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
       this.setState({todos: this.state.todos.changeColor(fs.getString())});
     });
 
