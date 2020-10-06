@@ -143,7 +143,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
     this.eventSource.init();
 
     // react to incoming feature changes in real-time
-    repo.getString('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
+    repo.feature('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
       this.setState({todos: this.state.todos.changeColor(fs.getString())});
     });
 
