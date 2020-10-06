@@ -1,13 +1,19 @@
 import * as React from 'react';
 import { Configuration, DefaultApi, Todo } from './api';
 import './App.css';
-import globalAxios from 'axios';
+import globalAxios, { AxiosRequestConfig } from 'axios';
 import {
-    FeatureContext,
-    featureHubRepository,
-    Readyness,
-    FeatureUpdater,
-    FeatureHubPollingClient, FeatureStateHolder, GoogleAnalyticsCollector
+  FeatureContext,
+  FeatureHubPollingClient,
+  featureHubRepository,
+  FeatureStateHolder,
+  FeatureUpdater,
+  Readyness,
+  StrategyAttributeCountryName,
+  StrategyAttributeDeviceName,
+  FeatureHubRepository,
+  LocalSessionInterceptor,
+  w3cBaggageHeader
 } from 'featurehub-repository/dist';
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
 
@@ -16,6 +22,7 @@ declare global {
     FeatureUpdater: any;
     PollingService: any;
     Repository: any;
+    ls: any;
   }
 }
 
@@ -29,13 +36,13 @@ let initialized = false;
 
 class TodoData {
   todos: Array<Todo>;
-  buttonColour: string | undefined;
+  backgroundColor: string;
   ready: boolean = false;
   featuresUpdated: boolean = false;
 
-  constructor(todos?: Array<Todo>, buttonColour?: string, ready?: boolean) {
+  constructor(todos?: Array<Todo>, backgroundColor?: string, ready?: boolean) {
     this.todos = todos || [];
-    this.buttonColour = buttonColour || 'blue';
+    this.backgroundColor = backgroundColor || 'blue';
     this.ready = ready || false;
   }
 
@@ -44,11 +51,11 @@ class TodoData {
   }
 
   changeTodos(todos: Array<Todo>): TodoData {
-    return new TodoData(todos, this.buttonColour, this.ready);
+    return new TodoData(todos, this.backgroundColor, this.ready);
   }
 
   changeFeaturesUpdated(fu: boolean): TodoData {
-    const td = new TodoData(this.todos, this.buttonColour, this.ready);
+    const td = new TodoData(this.todos, this.backgroundColor, this.ready);
     td.featuresUpdated = fu;
     return td;
   }
@@ -59,8 +66,26 @@ class ConfigData {
   sdkUrl: string;
 }
 
+globalAxios.interceptors.request.use(function (config: AxiosRequestConfig) {
+  const baggage = w3cBaggageHeader({repo: featureHubRepository, header: config.headers.Baggage});
+  // const baggage = w3cBaggageHeader({});
+  if (baggage) {
+    console.log('baggage is ', baggage);
+    config.headers.Baggage = baggage;
+  } else {
+    console.log('no baggage');
+  }
+  return config;
+}, function (error: any) {
+  // Do something with request error
+  return Promise.reject(error);
+});
+
+var repo: FeatureHubRepository;
+
 class App extends React.Component<{}, { todos: TodoData }> {
   private titleInput: HTMLInputElement;
+  private userName: HTMLInputElement;
   private eventSource: FeatureHubEventSourceClient;
 
   constructor() {
@@ -72,18 +97,27 @@ class App extends React.Component<{}, { todos: TodoData }> {
   }
 
   async initializeFeatureHub() {
-          featureHubRepository.addReadynessListener((readyness) => {
-              if (!initialized) {
-                  console.log('readyness', readyness);
-                  if (readyness === Readyness.Ready) {
-                      initialized = true;
-                      const color = featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').getString();
-                      this.setState({todos: this.state.todos.changeColor(color)});
-                  }
-              }
-          });
+    if (featureHubRepository.readyness === Readyness.Ready || this.eventSource) {
+      console.log('already initialized');
+      return;
+    }
 
-     //Using catch & release mechanism
+    repo = featureHubRepository;
+    const ls = new LocalSessionInterceptor();
+    featureHubRepository.addValueInterceptor(ls);
+
+    featureHubRepository.addReadynessListener((readyness) => {
+        if (!initialized) {
+            console.log('readyness', readyness);
+            if (readyness === Readyness.Ready) {
+                initialized = true;
+                const color = featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').getString();
+                this.setState({todos: this.state.todos.changeColor(color)});
+            }
+        }
+    });
+
+    // Using catch & release mechanism
     // featureHubRepository
     //   .addPostLoadNewFeatureStateAvailableListener((_) =>
     //                                                this.setState(
@@ -91,10 +125,16 @@ class App extends React.Component<{}, { todos: TodoData }> {
 
     // featureHubRepository.catchAndReleaseMode = true; // catch feature updates and release later
 
+    featureHubRepository.clientContext.userKey('auntie')
+      .country(StrategyAttributeCountryName.NewZealand)
+      .device(StrategyAttributeDeviceName.Browser)
+      .build();
+
     // load the config from the config json file
     const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
     // setup the api
     todoApi = new DefaultApi(new Configuration({basePath: config.baseUrl }));
+    ls.setUrl(config.sdkUrl); // this tells the flutter iframe (if it is included) where the sdk url is
     this._loadInitialData(); // let this happen in background
 
     // listen for features from the specified SDK Url for a given environment
@@ -102,7 +142,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
     this.eventSource.init();
 
     // react to incoming feature changes in real-time
-    featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
+    repo.feature('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
       this.setState({todos: this.state.todos.changeColor(fs.getString())});
     });
 
@@ -155,15 +195,34 @@ class App extends React.Component<{}, { todos: TodoData }> {
         </div>
       );
     }
-    let buttonStyle = {
-      color: this.state.todos.buttonColour
+    let backgroundColor = {
+      backgroundColor: this.state.todos.backgroundColor
     };
     return (
-      <div className="App">
+      <div className="App" style={backgroundColor}>
         {this.state.todos.featuresUpdated &&
         (<div className="updatedFeatures">There are updated features available.
           <button onClick={() => window.location.reload()}>REFRESH</button></div>)}
         <h1>Todo List</h1>
+        <div className="username">
+        <form>
+          <span>Name</span>
+          <input
+            ref={node => {
+            if (node != null) {
+              this.userName = node; // refresh the
+            }
+          }}
+          />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              featureHubRepository.clientContext.userKey(this.userName.value).build();
+            }}
+          >Set name
+          </button>
+        </form>
+        </div>
         <form
           onSubmit={e => {
             e.preventDefault();
@@ -178,7 +237,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
               }
             }}
           />
-          <button type="submit" style={buttonStyle}>Add</button>
+          <button type="submit">Add</button>
         </form>
         <ul>
           {this.state.todos.todos.map((todo, index) => {

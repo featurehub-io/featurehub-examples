@@ -2,7 +2,7 @@ import * as restify from 'restify';
 import * as corsMiddleware from 'restify-cors-middleware';
 import { ITodoApiController, Todo, TodoApiRouter } from "./generated-interface";
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
-import {FeatureContext, featureHubRepository, GoogleAnalyticsCollector, Readyness} from 'featurehub-repository/dist';
+import {FeatureContext, featureHubRepository, GoogleAnalyticsCollector, Readyness, StrategyAttributeCountryName, StrategyAttributeDeviceName, StrategyAttributePlatformName, featurehubMiddleware, FeatureHubRepository} from 'featurehub-repository/dist';
 
 if (process.env.FEATUREHUB_APP_ENV_URL === undefined) {
   console.error('You must define the location of your feature hub SDK URL in the environment variable FEATUREHUB_APP_ENV_URL');
@@ -15,37 +15,48 @@ const featureHubEventSourceClient  = new FeatureHubEventSourceClient(process.env
 featureHubEventSourceClient.init();
 // featureHubRepository.addAnalyticCollector(new GoogleAnalyticsCollector('UA-XXXYYYYY', '1234-5678-abcd-1234'));
 
+featureHubRepository.clientContext
+	.country(StrategyAttributeCountryName.NewZealand)
+	.device(StrategyAttributeDeviceName.Server)
+	.platform(StrategyAttributePlatformName.Macos)
+	.build();
 
 const api = restify.createServer();
 
-const cors = corsMiddleware({origins: ['*'], allowHeaders: [], exposeHeaders: []});
+const cors = corsMiddleware({origins: ['*'], allowHeaders: ['baggage'], exposeHeaders: []});
 
 api.pre(cors.preflight);
 api.use(cors.actual);
 api.use(restify.plugins.bodyParser());
 api.use(restify.plugins.queryParser());
+api.use(featurehubMiddleware(featureHubRepository));
 
 const port = process.env.TODO_PORT || 8099 ;
 
 let todos: Todo[] = [];
 
 class TodoController implements ITodoApiController {
+	private repo: FeatureHubRepository;
 
-  async resolveTodo(parameters: { id: string }): Promise<Array<Todo>> {
+	constructor(repo: FeatureHubRepository) {
+		this.repo = repo;
+	}
+
+	async resolveTodo(parameters: { id: string }): Promise<Array<Todo>> {
     const todo: Todo = todos.find((todo) => todo.id === parameters.id);
     todo.resolved = true;
     return this.listTodos();
   }
 
   async removeTodo(parameters: { id: string }): Promise<Array<Todo>> {
-    FeatureContext.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
+    this.repo.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
     const index: number = todos.findIndex((todo) => todo.id === parameters.id);
     todos.splice(index, 1);
     return this.listTodos();
   }
 
   async addTodo(parameters: { body?: Todo }): Promise<Array<Todo>> {
-    FeatureContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']]));
+	  this.repo.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']]));
     const todo: Todo = {
       id: Math.floor(Math.random() * 20).toString(),
       title: parameters.body.title,
@@ -57,7 +68,7 @@ class TodoController implements ITodoApiController {
   }
 
   private listTodos() : Array<Todo> {
-    if (FeatureContext.isActive('FEATURE_TITLE_TO_UPPERCASE')) {
+    if (this.repo.feature('FEATURE_TITLE_TO_UPPERCASE').getBoolean()) {
       const upperTodoList = [];
       todos.forEach((t) => {
         const newT = new Todo();
@@ -74,15 +85,14 @@ class TodoController implements ITodoApiController {
 
   async getTodos(parameters: {}): Promise<Array<Todo>> {
     return this.listTodos();
-    if (FeatureContext.isActive('FEATURE_TITLE_TO_UPPERCASE')) {
+	  if (this.repo.feature('FEATURE_TITLE_TO_UPPERCASE').getBoolean()) {
       todos.forEach(todo => todo.title = todo.title.toUpperCase());
     }
     return todos;
   }
 }
 
-const todoController = new TodoController();
-const todoRouter = new TodoApiRouter(api, todoController);
+const todoRouter = new TodoApiRouter(api, (req: any) => new TodoController(req.featureHub) );
 
 todoRouter.registerRoutes();
 
