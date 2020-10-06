@@ -2,7 +2,7 @@ import * as restify from 'restify';
 import * as corsMiddleware from 'restify-cors-middleware';
 import { ITodoApiController, Todo, TodoApiRouter } from "./generated-interface";
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
-import {FeatureContext, featureHubRepository, GoogleAnalyticsCollector, Readyness, StrategyAttributeCountryName, StrategyAttributeDeviceName, StrategyAttributePlatformName, featurehubMiddleware, FeatureHubRepository} from 'featurehub-repository/dist';
+import { featureHubRepository, GoogleAnalyticsCollector, Readyness, StrategyAttributeCountryName, StrategyAttributeDeviceName, StrategyAttributePlatformName, featurehubMiddleware, FeatureHubRepository} from 'featurehub-repository/dist';
 
 if (process.env.FEATUREHUB_APP_ENV_URL === undefined) {
   console.error('You must define the location of your feature hub SDK URL in the environment variable FEATUREHUB_APP_ENV_URL');
@@ -68,7 +68,7 @@ class TodoController implements ITodoApiController {
   }
 
   private listTodos() : Array<Todo> {
-    if (this.repo.feature('FEATURE_TITLE_TO_UPPERCASE').getBoolean()) {
+    if (this.repo.getFlag('FEATURE_TITLE_TO_UPPERCASE')) {
       const upperTodoList = [];
       todos.forEach((t) => {
         const newT = new Todo();
@@ -85,7 +85,7 @@ class TodoController implements ITodoApiController {
 
   async getTodos(parameters: {}): Promise<Array<Todo>> {
     return this.listTodos();
-	  if (this.repo.feature('FEATURE_TITLE_TO_UPPERCASE').getBoolean()) {
+	  if (this.repo.getFlag('FEATURE_TITLE_TO_UPPERCASE')) {
       todos.forEach(todo => todo.title = todo.title.toUpperCase());
     }
     return todos;

@@ -62,8 +62,9 @@ class TodoData {
 }
 
 class ConfigData {
-  baseUrl: string;
-  sdkUrl: string;
+    todoServerBaseUrl: string;
+    fhServerBaseUrl: string;
+    sdkUrl: string;
 }
 
 globalAxios.interceptors.request.use(function (config: AxiosRequestConfig) {
@@ -111,7 +112,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
             console.log('readyness', readyness);
             if (readyness === Readyness.Ready) {
                 initialized = true;
-                const color = featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').getString();
+                      const color = featureHubRepository.getString('SUBMIT_COLOR_BUTTON');
                 this.setState({todos: this.state.todos.changeColor(color)});
             }
         }
@@ -133,12 +134,12 @@ class App extends React.Component<{}, { todos: TodoData }> {
     // load the config from the config json file
     const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
     // setup the api
-    todoApi = new DefaultApi(new Configuration({basePath: config.baseUrl }));
-    ls.setUrl(config.sdkUrl); // this tells the flutter iframe (if it is included) where the sdk url is
+    todoApi = new DefaultApi(new Configuration({basePath: config.todoServerBaseUrl}));
+    ls.setUrl(`${config.fhServerBaseUrl}/features/${config.sdkUrl}`); // this tells the flutter iframe (if it is included) where the sdk url is
     this._loadInitialData(); // let this happen in background
 
     // listen for features from the specified SDK Url for a given environment
-    this.eventSource = new FeatureHubEventSourceClient(config.sdkUrl);
+    this.eventSource = new FeatureHubEventSourceClient(`${config.fhServerBaseUrl}/features/${config.sdkUrl}`);
     this.eventSource.init();
 
     // react to incoming feature changes in real-time
