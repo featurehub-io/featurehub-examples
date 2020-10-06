@@ -19,7 +19,7 @@
     "react-scripts-ts": "^3.1.0",
     "@types/react": "^16.9.42",
     "@types/react-dom": "^16.9.8",
-    "featurehub-eventsource-sdk": "^1.1.5",
+    "featurehub-eventsource-sdk": "^1.2.0",
     "typescript": "^3.9.7"
   }
 }
