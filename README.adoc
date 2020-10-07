@@ -15,19 +15,21 @@ As such, if you are running against version (say) `0.0.7` of our Docker images, 
 
 The SDK Examples consist of two variants
 
+- link:golang-service/README.md[Golang service example]
 - link:todo-backend-java/README{outfilesuffix}[Java backend server]
 - link:todo-backend-typescript/README{outfilesuffix}[Typescript backend server]
+- link:todo-frontend-react-typescript/README{outfilesuffix}[React app]
+- link:todo-frontend-react-typescript-feature-override/README{outfilesuffix}[React app with features overrides]
 
-Both of these will work for the link:todo-frontend-react-typescript/README{outfilesuffix}[React frontend] (which also uses features).
 
 == Running from the Docker image
 
-The examples are available in nodejs form, which makes it easier to explore.
+The React and Node JS server examples are available in the docker image.
 
 Please see our https://www.youtube.com/watch?v=DRVqXJmbvTk[Youtube Video] for details on how to run these in the Docker images.
 
 ----
-docker run -e 
+docker run -e
 FEATUREHUB_APP_ENV_URL=http://192.168.86.49:8903/features/default/d8ba747d-7d3c-4454-9c58-130390848412/5EE3vua1NqY0ez6Zd4TXU7XnsZdAPHtR96XaDmhfegitKGiQ9aCdmtmeNUNPubkRZLJLUUpaC7b05ELk
 -p 5000:5000  featurehub/example_node:1.1
 ----
