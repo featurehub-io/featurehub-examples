@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.featurehub.examples.todo.frontend</groupId>
-  <artifactId>todo-frontend</artifactId>
+  <groupId>io.featurehub.examples</groupId>
+  <artifactId>featurehub-react-feature-override-example</artifactId>
   <version>1.1-SNAPSHOT</version>
 
   <dependencies>
