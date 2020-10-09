@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.featurehub.examples</groupId>
-  <artifactId>featurehub-react-example</artifactId>
+  <artifactId>featurehub-react-feature-override-example</artifactId>
   <version>1.1-SNAPSHOT</version>
 
   <dependencies>
