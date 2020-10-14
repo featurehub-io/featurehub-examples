@@ -91,12 +91,12 @@ class App extends React.Component<{}, { todos: TodoData }> {
         });
 
         // Using catch & release mechanism
-        // featureHubRepository
-        //   .addPostLoadNewFeatureStateAvailableListener((_) =>
-        //                                                this.setState(
-        //                                                  {todos: this.state.todos.changeFeaturesUpdated(true)}) );
+        featureHubRepository
+          .addPostLoadNewFeatureStateAvailableListener((_) =>
+                                                       this.setState(
+                                                         {todos: this.state.todos.changeFeaturesUpdated(true)}) );
 
-        // featureHubRepository.catchAndReleaseMode = true; // catch feature updates and release later
+        featureHubRepository.catchAndReleaseMode = true; // catch feature updates and release later
 
         featureHubRepository.clientContext.userKey('auntie')
             .country(StrategyAttributeCountryName.NewZealand)
@@ -112,11 +112,6 @@ class App extends React.Component<{}, { todos: TodoData }> {
         // listen for features from the specified SDK Url for a given environment
         this.eventSource = new FeatureHubEventSourceClient(`${config.fhServerBaseUrl}/features/${config.sdkUrl}`);
         this.eventSource.init();
-
-        // react to incoming feature changes in real-time
-        featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
-            this.setState({todos: this.state.todos.changeColor(fs.getString())});
-        });
 
         // featureHubRepository.addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
     }
