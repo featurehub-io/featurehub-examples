@@ -169,7 +169,15 @@ class App extends React.Component<{}, { todos: TodoData }> {
             <div className="App">
                 {this.state.todos.featuresUpdated &&
                 (<div className="updatedFeatures">There are updated features available.
-                    <button onClick={() => window.location.reload()}>REFRESH</button></div>)}
+                    <button
+                        onClick={async () => {
+                            await featureHubRepository.release();
+                            const newColor = featureHubRepository.getString('SUBMIT_COLOR_BUTTON');
+                            this.setState({todos: this.state.todos.changeColor(newColor)});
+                        }
+                        }
+                    >REFRESH
+                    </button></div>)}
                 <h1>Todo List</h1>
                 <form
                     onSubmit={e => {
