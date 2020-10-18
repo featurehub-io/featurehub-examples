@@ -1,3 +1,5 @@
+package io.featurehub.cukejava;
+
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -9,7 +11,7 @@ import todo.model.Todo;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TodoStepdefs {
+public class TodoStepDefs {
   private static TodoService todoService = new TodoService();
   private String user;
 
@@ -30,7 +32,7 @@ public class TodoStepdefs {
       todoService.addTodo(user, new Todo().title(line.get("todo").trim()));
     });
   }
-  
+
   @When("my list of todos should be")
   public void iAskForAListOfTodos(DataTable table) {
     Map<String, String> todos = getTodoListAsMap();
