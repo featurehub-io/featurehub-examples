@@ -29,7 +29,7 @@ export interface Todo {
 class TodoLocalApi {
   private sessionKey = '_featurehub_todos';
 
-  public addTodo(todo: Todo, options?: any) : Array<Todo> {
+  public addTodo(todo: Todo, options?: any): Array<Todo> {
     const todos = this.listTodos();
 
     if (todo?.id === undefined) {
@@ -50,7 +50,7 @@ class TodoLocalApi {
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public listTodos(options?: any) : Array<Todo> {
+  public listTodos(options?: any): Array<Todo> {
     const data = window.localStorage.getItem(this.sessionKey);
 
     if (!data) {

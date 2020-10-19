@@ -26,7 +26,6 @@ window.FeatureUpdater = FeatureUpdater;
 window.PollingService = FeatureHubPollingClient;
 window.Repository = featureHubRepository;
 
-
 let initialized = false;
 
 class TodoData {

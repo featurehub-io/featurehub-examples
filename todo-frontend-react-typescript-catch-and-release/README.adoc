@@ -55,19 +55,6 @@ Generate AXIOS openapi client
 
 `mvn clean generate-sources`
 
-
-Run the back-end server: 
-
-`cd ../todo-backend-typescript`
-
-provide your SDK Url in `run.sh` file (this is required as backened server example also connects to FeatureHub for demo purposes)  
-
-`npm install && npm run-script start`
-
-After back-end server has started successfully:
-
-`cd ../todo-frontend-react-typescript`
-
 `npm run-script compile`
 
 `npm run-script start`
