@@ -1,5 +1,5 @@
 == Description
-Frontend Todo app to demonstrate the usage of FeatureHub Javascript/Typescript SDK with React front-end framework.
+Frontend Todo app to demonstrate the usage of FeatureHub Javascript/Typescript SDK with React front-end framework and Catch & Release mode.
 
 
 Demonstrates the feature of "STRING" type that controls the colour of a "SUBMIT" button. For example, you can set it as "green", "orange" etc..
