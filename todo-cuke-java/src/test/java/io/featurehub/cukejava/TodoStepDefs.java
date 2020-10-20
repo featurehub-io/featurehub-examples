@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TodoStepDefs {
-  private static TodoService todoService = new TodoService();
+  private static TodoService todoService = TodoService.todoService;
   private String user;
 
   @Given("I have a user called {string}")

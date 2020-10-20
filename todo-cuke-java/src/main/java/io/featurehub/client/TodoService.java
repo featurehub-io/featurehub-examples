@@ -26,6 +26,8 @@ public class TodoService implements todo.api.TodoService {
   private final FeatureService featureService;
   final String sdkRef;
 
+  public static TodoService todoService = new TodoService();
+
   public TodoService() {
     String edgeUrl = System.getProperty("edge.hostUrl", System.getenv("EDGE_HOST_URL"));
     sdkRef = System.getProperty("edge.sdk", System.getenv("EDGE_SDK"));
@@ -68,6 +70,7 @@ public class TodoService implements todo.api.TodoService {
 
   public void setFeatureState(String key, FeatureStateUpdate update) {
     featureService.setFeatureState(sdkRef, key, update);
+    confirmFeatureState(key, (Boolean)update.getValue());
   }
 
   @Override
@@ -94,5 +97,22 @@ public class TodoService implements todo.api.TodoService {
   @Override
   public List<Todo> resolveTodo(String id, String user) {
     return client.resolveTodo(id, user);
+  }
+
+  public void confirmFeatureState(String key, boolean state) {
+    for(int count = 0; count < 10; count ++) {
+      if (repository.getReadyness() == Readyness.Ready && repository.getFlag(key) == state) {
+        return;
+      }
+      count ++;
+
+      try {
+        Thread.sleep(300);
+      } catch (InterruptedException ignored) {
+      }
+    }
+
+    throw new RuntimeException(String.format("Timed out waiting for key `%s` to be %s", key,
+      Boolean.toString(state)));
   }
 }
