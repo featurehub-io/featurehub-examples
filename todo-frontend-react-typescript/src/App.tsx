@@ -50,11 +50,6 @@ class TodoData {
         return new TodoData(todos, this.buttonColour, this.ready);
     }
 
-    changeFeaturesUpdated(fu: boolean): TodoData {
-        const td = new TodoData(this.todos, this.buttonColour, this.ready);
-        td.featuresUpdated = fu;
-        return td;
-    }
 }
 
 class ConfigData {
@@ -89,14 +84,6 @@ class App extends React.Component<{}, { todos: TodoData }> {
                 }
             }
         });
-
-        // Using catch & release mechanism
-        // featureHubRepository
-        //   .addPostLoadNewFeatureStateAvailableListener((_) =>
-        //                                                this.setState(
-        //                                                  {todos: this.state.todos.changeFeaturesUpdated(true)}) );
-
-        // featureHubRepository.catchAndReleaseMode = true; // catch feature updates and release later
 
         featureHubRepository.clientContext.userKey('auntie')
             .country(StrategyAttributeCountryName.NewZealand)
@@ -172,9 +159,6 @@ class App extends React.Component<{}, { todos: TodoData }> {
         };
         return (
             <div className="App">
-                {this.state.todos.featuresUpdated &&
-                (<div className="updatedFeatures">There are updated features available.
-                    <button onClick={() => window.location.reload()}>REFRESH</button></div>)}
                 <h1>Todo List</h1>
                 <form
                     onSubmit={e => {

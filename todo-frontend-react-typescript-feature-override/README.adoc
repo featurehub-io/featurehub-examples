@@ -1,5 +1,5 @@
 == Description
-Frontend Todo app to demonstrate the usage of FeatureHub Javascript/Typescript SDK with React front-end framework.
+Frontend Todo app to demonstrate the usage of FeatureHub Javascript/Typescript SDK with React front-end framework with the usage of "Feature Overrides".
 
 
 Demonstrates the feature of "STRING" type that controls the colour of a "SUBMIT" button. For example, you can set it as "green", "orange" etc..
@@ -19,7 +19,7 @@ Once this is set, copy the SDK URL from the Service Accounts page for your desir
 
 You need to append at the front of it the edge url and it's port, like this `'http://[featurehub-edge-url]:[featurehub-edge-port]/features/[copied-sdk-url]`
 
-For example: `http://your-server:8553/features/default/4e439d38-1e87-4e77-84c3-2a32c112cfc5/Fpy5YpEfTeR5yQ15DUWEyvpQyfpjKHefMq9QhlodNzN8XH4by048X9Vjlj94fPieNc5nkagdfVoeAJxM` 
+For example: `http://your-server:8553/features/default/4e439d38-1e87-4e77-84c3-2a32c112cfc5/Fpy5YpEfTeR5yQ15DUWEyvpQyfpjKHefMq9QhlodNzN8XH4by048X9Vjlj94fPieNc5nkagdfVoeAJxM`
 
 Note, the port will depend on which FeatureHub installation you are running.
 If you are running SSE by itself, or the Docker with "all-separate-postgres" it will default to 8553. If you are running Party Server, it will be 8903, if you are running Docker with All-In-One-h2 it will be 8085
@@ -56,11 +56,11 @@ Generate AXIOS openapi client
 `mvn clean generate-sources`
 
 
-Run the back-end server: 
+Run the back-end server:
 
 `cd ../todo-backend-typescript`
 
-provide your SDK Url in `run.sh` file (this is required as backened server example also connects to FeatureHub for demo purposes)  
+provide your SDK Url in `run.sh` file (this is required as backened server example also connects to FeatureHub for demo purposes)
 
 `npm install && npm run-script start`
 

@@ -1,5 +1,5 @@
 == Description
-Frontend Todo app to demonstrate the usage of FeatureHub Javascript/Typescript SDK with React front-end framework.
+Frontend Todo app to demonstrate the usage of FeatureHub Javascript/Typescript SDK with React front-end framework and Catch & Release mode.
 
 
 Demonstrates the feature of "STRING" type that controls the colour of a "SUBMIT" button. For example, you can set it as "green", "orange" etc..
@@ -54,19 +54,6 @@ Install dependencies
 Generate AXIOS openapi client
 
 `mvn clean generate-sources`
-
-
-Run the back-end server: 
-
-`cd ../todo-backend-typescript`
-
-provide your SDK Url in `run.sh` file (this is required as backened server example also connects to FeatureHub for demo purposes)  
-
-`npm install && npm run-script start`
-
-After back-end server has started successfully:
-
-`cd ../todo-frontend-react-typescript`
 
 `npm run-script compile`
 

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Configuration, DefaultApi, Todo } from './api';
 import './App.css';
 import globalAxios from 'axios';
 import {
@@ -13,6 +12,7 @@ import {
     StrategyAttributeDeviceName
 } from 'featurehub-repository/dist';
 import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
+import { Todo, todoApi } from './local_storage_server';
 
 declare global {
     interface Window {
@@ -25,8 +25,6 @@ declare global {
 window.FeatureUpdater = FeatureUpdater;
 window.PollingService = FeatureHubPollingClient;
 window.Repository = featureHubRepository;
-
-let todoApi: DefaultApi;
 
 let initialized = false;
 
@@ -106,7 +104,6 @@ class App extends React.Component<{}, { todos: TodoData }> {
         // load the config from the config json file
         const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
         // setup the api
-        todoApi = new DefaultApi(new Configuration({basePath: config.todoServerBaseUrl}));
         this._loadInitialData(); // let this happen in background
 
         // listen for features from the specified SDK Url for a given environment
@@ -121,7 +118,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
     }
 
     async _loadInitialData() {
-        const todoResult = (await todoApi.listTodos({})).data;
+        const todoResult = (await todoApi.listTodos({}));
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
@@ -139,18 +136,18 @@ class App extends React.Component<{}, { todos: TodoData }> {
         };
 
         FeatureContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']])); // no cid
-        const todoResult = (await todoApi.addTodo(todo)).data;
+        const todoResult = (await todoApi.addTodo(todo));
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async removeToDo(id: string) {
         FeatureContext.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
-        const todoResult = (await todoApi.removeTodo(id)).data;
+        const todoResult = (await todoApi.removeTodo(id));
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async doneToDo(id: string) {
-        const todoResult = (await todoApi.resolveTodo(id)).data;
+        const todoResult = (await todoApi.resolveTodo(id));
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
@@ -169,7 +166,15 @@ class App extends React.Component<{}, { todos: TodoData }> {
             <div className="App">
                 {this.state.todos.featuresUpdated &&
                 (<div className="updatedFeatures">There are updated features available.
-                    <button onClick={() => window.location.reload()}>REFRESH</button></div>)}
+                    <button
+                        onClick={async () => {
+                            await featureHubRepository.release();
+                            const newColor = featureHubRepository.getString('SUBMIT_COLOR_BUTTON');
+                            this.setState({todos: this.state.todos.changeColor(newColor)});
+                        }
+                        }
+                    >REFRESH
+                    </button></div>)}
                 <h1>Todo List</h1>
                 <form
                     onSubmit={e => {
