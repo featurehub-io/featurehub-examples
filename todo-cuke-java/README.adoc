@@ -4,7 +4,8 @@ This is an example set of Cucumber tests for the Java backend. It demonstrates t
 and ensuring that the feature toggle is behaving correctly.
 
 The following is an example of the `OFF` state of the feature toggle. Here we are using a Hook to either determine
-the state of the feature (selective use) or set the state of the feature (imperative use).
+the state of the feature and fail if it is not set correctly (_selective use_) 
+or set the state of the feature (_imperative use_).
 
 ----
 Feature: The todo should allow to add, list and complete features when the feature is off
@@ -42,14 +43,23 @@ properties:
 
 == Selective use
 
-If you run the tests in selective mode, you must tell Cucumber which tags to NOT select, so if your feature is on,
-you should tell it to *NOT* select the feature that is OFF. You do this so all the other tagged tests will run, it
-is the Cucumber way of doing things. 
+If you are using the selective option there are some things to remember:
+
+1. You need to set the state of your feature flags before you do your cucumber run, ideally using our Test API. Usage
+of this is included in the SDK documentation and is included as an example in this project.
+2. You need to tag all tests that will have both ON and OFF values. When running cucumber tests pass those same settings from step (1) above
+as tag selections to your cucumber tests.
+
+==== Example for Selective Use 
+
+If for example you are using our flag for our example FEATURE_TITLE_TO_UPPERCASE and you want
+to run the tests where this flag is ON, you must tag those tests that expect it to be off (@FEATURE_TITLE_TO_UPPERCASE_OFF)
+and then run your tests with `tags="not @FEATURE_TITLE_TO_UPPERCASE_OFF"`. This means it will run all tests excluding
+the ones that have been specifically turned off (including non-tagged ones).
 
 If your feature is ON, run with
-
 ----
-mvn -Dcucumber.tags="~@FEATURE_TITLE_TO_UPPERCASE_OFF" clean test
+mvn -Dcucumber.filter.tags="not @FEATURE_TITLE_TO_UPPERCASE_OFF" clean test
 ----
 
 Otherwise you will get one failure (you should try this anyway).
@@ -57,7 +67,7 @@ Otherwise you will get one failure (you should try this anyway).
 If your feature is OFF, run with
 
 ----
-mvn -Dcucumber.tags="~@FEATURE_TITLE_TO_UPPERCASE_ON" clean test
+mvn -Dcucumber.filter.tags="not @FEATURE_TITLE_TO_UPPERCASE_ON" clean test
 ----
 
 The code to check for this is in `FeatureHooks` - it will check with the Feature repository for around 3 seconds to
@@ -71,7 +81,7 @@ In this case, the `FeatureHook` will actually set the feature toggle's value for
 mvn -Dfeatures.imperative clean test
 ----
 
-They should both pass.
+They should both pass. The `features.imperative` system property is being checked for in `FeatureHook` class.
 
 If you wish to explore the _parallel_ option, where they both run at the same time, one will always fail and it will
 be random. A feature cannot be both states across the board at the same time. To do so, edit the pom.xml file and uncommment
