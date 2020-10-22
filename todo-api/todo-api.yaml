@@ -1,12 +1,17 @@
 openapi: 3.0.0
 info:
-  version: ""
+  version: "1.0.0"
   title: Todo
-  description: ""
+  description: "Sample todo-api"
 paths:
-  "/todo/{id}/resolve":
+  "/todo/{user}/{id}/resolve":
     parameters:
       - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: user
         in: path
         required: true
         schema:
@@ -14,6 +19,8 @@ paths:
     put:
       operationId: resolveTodo
       summary: resolveTodo
+      tags:
+        - TodoService
       responses:
         "200":
           description: ""
@@ -23,8 +30,13 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Todo"
-  "/todo/{id}/remove":
+  "/todo/{user}/{id}":
     parameters:
+      - name: user
+        in: path
+        required: true
+        schema:
+          type: string
       - name: id
         in: path
         required: true
@@ -32,6 +44,8 @@ paths:
           type: string
     delete:
       operationId: removeTodo
+      tags:
+        - TodoService
       summary: removeTodo
       responses:
         "200":
@@ -42,9 +56,17 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Todo"
-  /todo/add:
+  /todo/{user}:
+    parameters:
+      - name: user
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       operationId: addTodo
+      tags:
+        - TodoService
       summary: addTodo
       requestBody:
         content:
@@ -52,7 +74,7 @@ paths:
             schema:
               $ref: "#/components/schemas/Todo"
       responses:
-        "200":
+        "201":
           description: ""
           content:
             application/json:
@@ -60,9 +82,18 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Todo"
-  /todo/list:
+    delete:
+      operationId: removeAllTodos
+      tags:
+        - TodoService
+      summary: removeAll
+      responses:
+        "204":
+          description: ""
     get:
       operationId: listTodos
+      tags:
+        - TodoService
       summary: listTodos
       responses:
         "200":

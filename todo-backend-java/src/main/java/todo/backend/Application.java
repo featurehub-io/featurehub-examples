@@ -10,7 +10,6 @@ import io.featurehub.client.FeatureRepository;
 import io.featurehub.client.GoogleAnalyticsCollector;
 import io.featurehub.client.Readyness;
 import io.featurehub.client.StaticFeatureContext;
-import io.featurehub.client.interceptor.OpenTracingValueInterceptor;
 import io.featurehub.client.interceptor.SystemPropertyValueInterceptor;
 import io.featurehub.client.jersey.GoogleAnalyticsJerseyApiClient;
 import io.featurehub.client.jersey.JerseyClient;
@@ -48,7 +47,6 @@ public class Application {
 
     FeatureRepository cfr = new ClientFeatureRepository(5);
     cfr.registerValueInterceptor(true, new SystemPropertyValueInterceptor());
-    cfr.registerValueInterceptor(false, new OpenTracingValueInterceptor());
     cfr.addAnalyticCollector(new GoogleAnalyticsCollector(analyticsKey, analyticsCid, new GoogleAnalyticsJerseyApiClient()));
 
     cfr.clientContext()
