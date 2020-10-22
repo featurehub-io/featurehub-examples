@@ -51,10 +51,6 @@ Install dependencies
 
 `npm install`
 
-Generate AXIOS openapi client
-
-`mvn clean generate-sources`
-
 `npm run-script compile`
 
 `npm run-script start`
