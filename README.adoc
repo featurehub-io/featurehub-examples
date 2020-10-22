@@ -13,18 +13,19 @@ As such, if you are running against version (say) `0.0.7` of our Docker images, 
 
 == The SDK Examples
 
-The SDK Examples consist of two variants
+The SDK Examples consist of
 
 - link:golang-service/README.md[Golang service example]
 - link:todo-backend-java/README{outfilesuffix}[Java backend server]
 - link:todo-backend-typescript/README{outfilesuffix}[Typescript backend server]
 - link:todo-frontend-react-typescript/README{outfilesuffix}[React app]
+- link:todo-frontend-react-typescript-catch-and-release/README{outfilesuffix}[React app with catch & release mode]
 - link:todo-frontend-react-typescript-feature-override/README{outfilesuffix}[React app with features overrides]
 
 
 == Running from the Docker image
 
-The React and Node JS server examples are available in the docker image.
+The React app and Node JS server examples are available in the docker image.
 
 Please see our https://www.youtube.com/watch?v=DRVqXJmbvTk[Youtube Video] for details on how to run these in the Docker images.
 
