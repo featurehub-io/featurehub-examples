@@ -87,7 +87,7 @@
             <phase>generate-sources</phase>
             <configuration>
               <output>${project.basedir}</output>
-              <inputSpec>${project.basedir}/../../../todo-api/todo-api.yaml</inputSpec>
+              <inputSpec>${project.basedir}/../../../../todo-api/todo-api.yaml</inputSpec>
               <generatorName>aspnetcore</generatorName>
               <generateApiDocumentation>false</generateApiDocumentation>
               <generateModelDocumentation>false</generateModelDocumentation>
