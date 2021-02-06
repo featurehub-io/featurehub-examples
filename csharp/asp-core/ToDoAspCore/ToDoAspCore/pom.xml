@@ -45,7 +45,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>src/IO</directory>
+              <directory>src/ToDoAspCore/Models</directory>
               <includes>
                 <include>**/**</include>
               </includes>
