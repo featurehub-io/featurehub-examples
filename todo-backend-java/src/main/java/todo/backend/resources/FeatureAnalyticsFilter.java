@@ -1,8 +1,9 @@
 package todo.backend.resources;
 
 import io.featurehub.client.GoogleAnalyticsApiClient;
-import io.featurehub.client.StaticFeatureContext;
+import todo.backend.FeatureHub;
 
+import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -13,9 +14,17 @@ import java.util.List;
 import java.util.Map;
 
 public class FeatureAnalyticsFilter implements ContainerRequestFilter, ContainerResponseFilter {
+  private final FeatureHub fh;
+
+  @Inject
+  public FeatureAnalyticsFilter(FeatureHub fh) {
+    this.fh = fh;
+  }
+
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
     requestContext.setProperty("startTime", System.currentTimeMillis());
+
   }
 
   @Override
@@ -30,7 +39,7 @@ public class FeatureAnalyticsFilter implements ContainerRequestFilter, Container
     other.put(GoogleAnalyticsApiClient.GA_VALUE, Long.toString(duration));
     final List<String> matchedURIs = requestContext.getUriInfo().getMatchedURIs();
     if (matchedURIs.size() > 0) {
-      StaticFeatureContext.getInstance().logAnalyticsEvent(matchedURIs.get(0), other);
+      fh.getRepository().logAnalyticsEvent(matchedURIs.get(0), other);
     }
 
   }

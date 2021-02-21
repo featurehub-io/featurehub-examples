@@ -2,28 +2,25 @@ package todo.backend;
 
 import cd.connect.app.config.ConfigKey;
 import cd.connect.app.config.DeclaredConfigResolver;
-import cd.connect.jersey.common.*;
+import cd.connect.jersey.common.CommonConfiguration;
+import cd.connect.jersey.common.CorsFilter;
+import cd.connect.jersey.common.InfrastructureConfiguration;
+import cd.connect.jersey.common.LoggingConfiguration;
+import cd.connect.jersey.common.TracingConfiguration;
 import cd.connect.lifecycle.ApplicationLifecycleManager;
 import cd.connect.lifecycle.LifecycleStatus;
-import io.featurehub.client.ClientFeatureRepository;
-import io.featurehub.client.FeatureRepository;
-import io.featurehub.client.GoogleAnalyticsCollector;
 import io.featurehub.client.Readyness;
-import io.featurehub.client.StaticFeatureContext;
-import io.featurehub.client.interceptor.SystemPropertyValueInterceptor;
-import io.featurehub.client.jersey.GoogleAnalyticsJerseyApiClient;
-import io.featurehub.client.jersey.JerseyClient;
-import io.featurehub.sse.model.StrategyAttributeDeviceName;
-import io.featurehub.sse.model.StrategyAttributePlatformName;
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import todo.backend.resources.FeatureAnalyticsFilter;
 import todo.backend.resources.TodoResource;
 
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
@@ -32,35 +29,17 @@ public class Application {
 	private static final Logger log = LoggerFactory.getLogger(Application.class);
 	@ConfigKey("server.port")
 	String serverPort = "8099";
-	@ConfigKey("feature-service.url")
-  String featureHubUrl;
-	@ConfigKey("feature-service.google-analytics-key")
-  String analyticsKey;
-	@ConfigKey("feature-service.cid")
-  String analyticsCid;
 
   public Application() {
     DeclaredConfigResolver.resolve(this);
   }
 
   public void init() throws Exception {
-
-    FeatureRepository cfr = new ClientFeatureRepository(5);
-    cfr.registerValueInterceptor(true, new SystemPropertyValueInterceptor());
-    cfr.addAnalyticCollector(new GoogleAnalyticsCollector(analyticsKey, analyticsCid, new GoogleAnalyticsJerseyApiClient()));
-
-    cfr.clientContext()
-      .device(StrategyAttributeDeviceName.SERVER)
-      .platform(StrategyAttributePlatformName.LINUX)
-      .attr("language", "java")
-      .build();
-
-    StaticFeatureContext.repository = cfr;
-    new JerseyClient(featureHubUrl, true, cfr);
-
     URI BASE_URI = URI.create(String.format("http://0.0.0.0:%s/", serverPort));
 
-    log.info("attemping to start on port {} - will wait for features", BASE_URI.toASCIIString());
+    log.info("attempting to start on port {} - will wait for features", BASE_URI.toASCIIString());
+
+    FeatureHubSource fhSource = new FeatureHubSource();
 
     // register our resources, try and tag them as singleton as they are instantiated faster
     ResourceConfig config = new ResourceConfig(
@@ -71,13 +50,21 @@ public class Application {
       LoggingConfiguration.class,
       TracingConfiguration.class,
       FeatureAnalyticsFilter.class, // why not
-      InfrastructureConfiguration.class);
+      InfrastructureConfiguration.class)
+      .register(new AbstractBinder() {
+        @Override
+        protected void configure() {
+          bind(fhSource).in(Singleton.class).to(FeatureHub.class);
+        }
+      })
+
+      ;
 
     final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, config, false);
 
     // call "server.start()" here if you wish to start the application without waiting for features
     log.info("Waiting on a complete list of features before starting.");
-    cfr.addReadynessListener((ready) -> {
+    fhSource.getRepository().addReadynessListener((ready) -> {
       if (ready == Readyness.Ready) {
         try {
           server.start();
