@@ -22,7 +22,7 @@ import java.util.UUID;
 public class TodoService implements todo.api.TodoService {
   private static final Logger log = LoggerFactory.getLogger(TodoService.class);
   private final TodoServiceClient client;
-  final FeatureRepository repository;
+  final FeatureRepositoryContext repository;
   private final FeatureService featureService;
   final String sdkRef;
 
@@ -43,7 +43,7 @@ public class TodoService implements todo.api.TodoService {
     }
 
     repository = new ClientFeatureRepository(2);
-    new JerseyClient(edgeUrl + "features/" + sdkRef, true, repository);
+    new JerseyClient(new EdgeFeatureHubConfig(edgeUrl, sdkRef), repository);
 
     System.out.println(edgeUrl + "features/" + sdkRef);
     log.info("update sdkurl is {}", edgeUrl + "features/" + sdkRef);
@@ -101,9 +101,10 @@ public class TodoService implements todo.api.TodoService {
 
   public void confirmFeatureState(String key, boolean state) {
     for(int count = 0; count < 10; count ++) {
-      if (repository.getReadyness() == Readyness.Ready && repository.getFlag(key) == state) {
+      if (repository.getReadyness() == Readyness.Ready && repository.getFeatureState(key).getBoolean() == state) {
         return;
       }
+
       count ++;
 
       try {

@@ -66,14 +66,14 @@ public class TodoStepDefs {
   public void theFeatureIsSomething(String key, String state) {
     boolean on = state.equalsIgnoreCase("on");
 
-    if (todoService.getRepository().getFlag(key) == on) {
+    if (todoService.getRepository().isEnabled(key) == on) {
       return;
     }
 
     todoService.setFeatureState(key, new FeatureStateUpdate().lock(false).value(on));
 
     int counter = 0;
-    while (counter < 5 && todoService.getRepository().getFlag(key) != on) {
+    while (counter < 5 && todoService.getRepository().isEnabled(key) != on) {
       System.out.println("Try #" + counter);
       try {
         Thread.sleep(1000);
@@ -82,7 +82,7 @@ public class TodoStepDefs {
       }
       counter ++;
     }
-    if (todoService.getRepository().getFlag(key) != on) {
+    if (todoService.getRepository().isEnabled(key) != on) {
       throw new RuntimeException(String.format("Failed to transition key `%s` to `%s`", key, state));
     }
   }
