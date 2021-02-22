@@ -14,10 +14,12 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using ToDoAspCore.Attributes;
 using ToDoAspCore.Models;
+using ToDoAspCore.Services;
 
 namespace ToDoAspCore.Controllers
 { 
@@ -26,7 +28,21 @@ namespace ToDoAspCore.Controllers
     /// </summary>
     [ApiController]
     public class TodoServiceApiController : ControllerBase
-    { 
+    {
+        private readonly IServiceProvider _provider;
+
+        public TodoServiceApiController(IServiceProvider provider)
+        {
+            this._provider = provider;
+            
+        }
+
+
+        private List<Todo> GetTodosForUser(string user)
+        {
+            return ((ITodoServiceRepository) _provider.GetService(typeof(ITodoServiceRepository))).UsersTodos(user);
+        }
+        
         /// <summary>
         /// addTodo
         /// </summary>
@@ -40,19 +56,18 @@ namespace ToDoAspCore.Controllers
         [SwaggerResponse(statusCode: 201, type: typeof(List<Todo>), description: "")]
         public virtual IActionResult AddTodo([FromRoute][Required]string user, [FromBody]Todo todo)
         {
+            if (todo.Id == null)
+            {
+                todo.Id = new Guid().ToString();
+            }
 
-            var result = new ObjectResult(new List<Todo> {todo});
+            var todos = GetTodosForUser(user);
+            
+            todos.Add(todo);
+            
+            var result = new ObjectResult(todos);
             result.StatusCode = 201;
             return result;
-            // return StatusCode(201, default(List<Todo>));
-            // string exampleJson = null;
-            // exampleJson = "{\n  \"id\" : \"id\",\n  \"title\" : \"title\",\n  \"when\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"resolved\" : true\n}";
-            //
-            // var example = exampleJson != null
-            // ? JsonConvert.DeserializeObject<List<Todo>>(exampleJson)
-            // : default(List<Todo>);
-            // //TODO: Change the data returned
-            // return new ObjectResult(example);
         }
 
         /// <summary>
@@ -66,18 +81,10 @@ namespace ToDoAspCore.Controllers
         [SwaggerOperation("ListTodos")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Todo>), description: "")]
         public virtual IActionResult ListTodos([FromRoute][Required]string user)
-        { 
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<Todo>));
-            string exampleJson = null;
-            exampleJson = "{\n  \"id\" : \"id\",\n  \"title\" : \"title\",\n  \"when\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"resolved\" : true\n}";
-            
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Todo>>(exampleJson)
-            : default(List<Todo>);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+        {
+            var result = new ObjectResult(GetTodosForUser(user));
+            result.StatusCode = 200;
+            return result;
         }
 
         /// <summary>
@@ -91,11 +98,9 @@ namespace ToDoAspCore.Controllers
         [SwaggerOperation("RemoveAllTodos")]
         public virtual IActionResult RemoveAllTodos([FromRoute][Required]string user)
         { 
+            GetTodosForUser(user).Clear();
 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-
-            throw new NotImplementedException();
+            return StatusCode(204);
         }
 
         /// <summary>
@@ -110,18 +115,12 @@ namespace ToDoAspCore.Controllers
         [SwaggerOperation("RemoveTodo")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Todo>), description: "")]
         public virtual IActionResult RemoveTodo([FromRoute][Required]string user, [FromRoute][Required]string id)
-        { 
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<Todo>));
-            string exampleJson = null;
-            exampleJson = "{\n  \"id\" : \"id\",\n  \"title\" : \"title\",\n  \"when\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"resolved\" : true\n}";
-            
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Todo>>(exampleJson)
-            : default(List<Todo>);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+        {
+            var todos = GetTodosForUser(user);
+            todos.RemoveAll((t) => t.Id == id);
+            var result = new ObjectResult(todos);
+            result.StatusCode = 200;
+            return result;
         }
 
         /// <summary>
@@ -136,18 +135,19 @@ namespace ToDoAspCore.Controllers
         [SwaggerOperation("ResolveTodo")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Todo>), description: "")]
         public virtual IActionResult ResolveTodo([FromRoute][Required]string id, [FromRoute][Required]string user)
-        { 
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<Todo>));
-            string exampleJson = null;
-            exampleJson = "{\n  \"id\" : \"id\",\n  \"title\" : \"title\",\n  \"when\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"resolved\" : true\n}";
+        {
+            var todos = GetTodosForUser(user);
+            foreach (var todo in todos)
+            {
+                if (todo.Id == id)
+                {
+                    todo.Resolved = true;
+                }
+            }
             
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Todo>>(exampleJson)
-            : default(List<Todo>);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            var result = new ObjectResult(todos);
+            result.StatusCode = 200;
+            return result;
         }
     }
 }
