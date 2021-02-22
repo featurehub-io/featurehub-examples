@@ -11,7 +11,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.AspNetCore.Authorization;
+using FeatureHubSDK;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -20,9 +20,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using ToDoAspCore.Authentication;
 using ToDoAspCore.Filters;
 using ToDoAspCore.OpenApi;
+using ToDoAspCore.Services;
 
 namespace ToDoAspCore
 {
@@ -44,6 +44,17 @@ namespace ToDoAspCore
         /// The application configuration.
         /// </summary>
         public IConfiguration Configuration { get; }
+
+        private void AddFeatureHubConfiguration(IServiceCollection services)
+        {
+            IFeatureHubConfig config = new FeatureHubConfig(Configuration["FeatureHub:Host"], Configuration["FeatureHub:ApiKey"]);
+            IFeatureRepositoryContext repository = new FeatureHubRepository();
+            IEdgeService edgeService = new EventServiceListener(repository, config);
+            
+            services.Add(ServiceDescriptor.Singleton(typeof(IFeatureHubConfig), config));
+            services.Add(ServiceDescriptor.Singleton(typeof(IFeatureRepositoryContext), repository));
+            services.Add(ServiceDescriptor.Singleton(typeof(IEdgeService), edgeService));
+        }
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
@@ -95,6 +106,10 @@ namespace ToDoAspCore
                 });
                 services
                     .AddSwaggerGenNewtonsoftSupport();
+                
+                AddFeatureHubConfiguration(services);
+                
+                services.Add(ServiceDescriptor.Singleton(typeof(ITodoServiceRepository), new TodoServiceInMemoryRepository()));
         }
 
         /// <summary>
