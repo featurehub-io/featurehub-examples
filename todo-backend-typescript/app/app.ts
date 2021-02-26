@@ -68,26 +68,49 @@ class TodoController implements ITodoApiController {
   }
 
   private listTodos() : Array<Todo> {
-    if (this.repo.getFlag('FEATURE_TITLE_TO_UPPERCASE')) {
-      const upperTodoList = [];
+      const newTodoList = [];
       todos.forEach((t) => {
         const newT = new Todo();
         newT.id = t.id;
         newT.resolved = t.resolved;
-        newT.title = t.title?.toUpperCase();
-        upperTodoList.push(newT);
+        newT.title = this.processTitle(t.title);
+        newTodoList.push(newT);
       });
-      return upperTodoList;
+      return newTodoList;
+  }
+
+  processTitle(title: string) {
+
+    if (this.repo.isSet('FEATURE_STRING') != null && title == 'buy') {
+      title = `${title} ${this.repo.getString('FEATURE_STRING')}`;
+      console.log('Processes string feature', title);
     }
 
-    return todos;
+    if (this.repo.isSet('FEATURE_NUMBER') != null && title == 'pay $') {
+      title = `${title}${this.repo.getNumber('FEATURE_NUMBER').toString()}`;
+      console.log('Processed number feature', title);
+    }
+
+    if (this.repo.isSet('FEATURE_JSON') != null && title == 'find') {
+      const json = JSON.parse(this.repo.getJson('FEATURE_JSON'));
+      title = `${title} ${json['foo']}`; // expecting {"foo":"bar"}
+      console.log('Processed JSON feature', title);
+    }
+
+      if (this.repo.getFlag('FEATURE_TITLE_TO_UPPERCASE')) {
+        title = title.toUpperCase();
+        console.log('Processed boolean feature', title);
+
+    }
+    return title;
   }
 
   async getTodos(parameters: {}): Promise<Array<Todo>> {
     return this.listTodos();
-	  if (this.repo.getFlag('FEATURE_TITLE_TO_UPPERCASE')) {
-      todos.forEach(todo => todo.title = todo.title.toUpperCase());
-    }
+  }
+
+  async removeTodos(parameters: { user: string }): Promise<Array<Todo>> {
+    todos = [];
     return todos;
   }
 }
