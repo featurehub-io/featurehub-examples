@@ -50,10 +50,11 @@ namespace ToDoAspCore
             IFeatureHubConfig config = new FeatureHubConfig(Configuration["FeatureHub:Host"], Configuration["FeatureHub:ApiKey"]);
             IFeatureRepositoryContext repository = new FeatureHubRepository();
             IEdgeService edgeService = new EventServiceListener(repository, config);
-            
+
+            config.Repository = repository;
+            config.EdgeService = edgeService;
+
             services.Add(ServiceDescriptor.Singleton(typeof(IFeatureHubConfig), config));
-            services.Add(ServiceDescriptor.Singleton(typeof(IFeatureRepositoryContext), repository));
-            services.Add(ServiceDescriptor.Singleton(typeof(IEdgeService), edgeService));
         }
 
         /// <summary>

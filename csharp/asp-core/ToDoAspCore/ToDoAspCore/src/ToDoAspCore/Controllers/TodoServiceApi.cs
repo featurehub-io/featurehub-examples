@@ -11,6 +11,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
+using FeatureHubSDK;
+using IO.FeatureHub.SSE.Model;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Authorization;
@@ -29,18 +32,18 @@ namespace ToDoAspCore.Controllers
     [ApiController]
     public class TodoServiceApiController : ControllerBase
     {
-        private readonly IServiceProvider _provider;
+        private readonly ITodoServiceRepository _todoServiceRepository;
+        private readonly IFeatureHubConfig _featureHub;
 
-        public TodoServiceApiController(IServiceProvider provider)
+        public TodoServiceApiController(ITodoServiceRepository todoServiceRepository, IFeatureHubConfig featureHub)
         {
-            this._provider = provider;
-            
+            _todoServiceRepository = todoServiceRepository;
+            _featureHub = featureHub;
         }
-
 
         private List<Todo> GetTodosForUser(string user)
         {
-            return ((ITodoServiceRepository) _provider.GetService(typeof(ITodoServiceRepository))).UsersTodos(user);
+            return _todoServiceRepository.UsersTodos(user);
         }
         
         /// <summary>
@@ -70,6 +73,28 @@ namespace ToDoAspCore.Controllers
             return result;
         }
 
+        private async Task<List<Todo>> TransformTodos(string user, List<Todo> todos)
+        {
+            var ctx = await _featureHub.NewContext().UserKey(user).Platform(StrategyAttributePlatformName.Macos).Build();
+            if (ctx["FEATURE_TITLE_TO_UPPERCASE"].IsEnabled)
+            {
+                var t = new List<Todo>();
+                foreach (var todo in todos)
+                {
+                    var nTodo = new Todo();
+                    nTodo.Id = todo.Id;
+                    nTodo.Resolved = todo.Resolved;
+                    nTodo.Title = todo.Title.ToUpper();
+                    nTodo.When = todo.When;
+                    t.Add(nTodo);
+                }
+
+                return t;
+            }
+            
+            return todos;
+        }
+
         /// <summary>
         /// listTodos
         /// </summary>
@@ -80,9 +105,10 @@ namespace ToDoAspCore.Controllers
         [ValidateModelState]
         [SwaggerOperation("ListTodos")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Todo>), description: "")]
-        public virtual IActionResult ListTodos([FromRoute][Required]string user)
+        public virtual async Task<IActionResult> ListTodos([FromRoute] [Required] string user)
         {
-            var result = new ObjectResult(GetTodosForUser(user));
+            var todos = await TransformTodos(user, GetTodosForUser(user));
+            var result = new ObjectResult(todos);
             result.StatusCode = 200;
             return result;
         }
