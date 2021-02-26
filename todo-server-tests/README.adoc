@@ -1,0 +1,17 @@
+== To run the tests:
+
+npm install
+npm generate:specs
+npm compile
+npm test
+
+== Prerequisites:
+Requires to setup the following features in the Admin Console:
+
+* FEATURE_TITLE_TO_UPPERCASE (boolean)
+* FEATURE_NUMBER (number)
+* FEATURE_STRING (string)
+* FEATURE_JSON (json)
+
+The values can be set to blank, as they are controlled from the tests.
+
