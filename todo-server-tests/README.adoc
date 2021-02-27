@@ -1,9 +1,9 @@
 == To run the tests:
 
 npm install
-npm generate:specs
-npm compile
-npm test
+npm run generate:specs
+npm run compile
+npm run test
 
 == Prerequisites:
 Requires to setup the following features in the Admin Console:

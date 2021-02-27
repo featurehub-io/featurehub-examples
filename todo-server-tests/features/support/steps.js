@@ -13,7 +13,8 @@ const client_axios_1 = require("../../src/client-axios");
 const { Given, When, Then } = require("@cucumber/cucumber");
 const chai_1 = require("chai");
 const config_1 = require("./config");
-const todoApi = new client_axios_1.TodoServiceApi(new client_axios_1.Configuration({ basePath: config_1.Config.basePath }));
+const wait_for_expect_1 = require("wait-for-expect");
+const todoApi = new client_axios_1.TodoServiceApi(new client_axios_1.Configuration({ basePath: config_1.Config.baseApplicationPath }));
 Given("I wipe my list of todos", function () {
     return __awaiter(this, void 0, void 0, function* () {
         yield todoApi.removeAllTodos(this.user);
@@ -21,10 +22,18 @@ Given("I wipe my list of todos", function () {
 });
 Then("my list of todos should contain {string}", function (todoDescription) {
     return __awaiter(this, void 0, void 0, function* () {
-        const response = yield todoApi.listTodos(this.user);
-        const responseData = response.data;
-        const todo = responseData.find((item) => item.title == todoDescription);
-        chai_1.expect(todo, `Expected ${todoDescription} but found in the response: ${responseData[0].title}`).to.exist;
+        function extracted() {
+            return __awaiter(this, void 0, void 0, function* () {
+                const response = yield todoApi.listTodos(this.user);
+                const responseData = response.data;
+                const todo = responseData.find((item) => item.title == todoDescription);
+                return { responseData, todo };
+            });
+        }
+        yield wait_for_expect_1.default(() => __awaiter(this, void 0, void 0, function* () {
+            const { responseData, todo } = yield extracted.call(this);
+            chai_1.expect(todo, `Expected ${todoDescription} but found in the response: ${responseData[0].title}`).to.exist;
+        }));
     });
 });
 Given("I have a user called {string}", function (userName) {

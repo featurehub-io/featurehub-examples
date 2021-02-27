@@ -33,9 +33,34 @@ Before({ tags: "@FEATURE_STRING_BREAD" }, function () {
         yield updateFeature('FEATURE_STRING', 'bread');
     });
 });
+Before({ tags: "@FEATURE_STRING_EMPTY" }, function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield updateFeature('FEATURE_STRING', '');
+    });
+});
 Before({ tags: "@FEATURE_STRING_NULL" }, function () {
     return __awaiter(this, void 0, void 0, function* () {
         yield setFeatureToNotSet('FEATURE_STRING');
+    });
+});
+Before({ tags: "@FEATURE_NUMBER_1" }, function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield updateFeature('FEATURE_NUMBER', 1);
+    });
+});
+Before({ tags: "@FEATURE_NUMBER_500" }, function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield updateFeature('FEATURE_NUMBER', 500);
+    });
+});
+Before({ tags: "@FEATURE_JSON_BAR" }, function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield updateFeature('FEATURE_JSON', JSON.parse("foo:bar"));
+    });
+});
+Before({ tags: "@FEATURE_JSON_BAZ" }, function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield updateFeature('FEATURE_JSON', JSON.parse("foo:bar"));
     });
 });
 Before({ tags: "@FEATURE_NUMBER_NULL" }, function () {

@@ -19,8 +19,28 @@ Before({tags: "@FEATURE_STRING_BREAD"}, async function () {
     await updateFeature('FEATURE_STRING','bread');
 });
 
+Before({tags: "@FEATURE_STRING_EMPTY"}, async function () {
+    await updateFeature('FEATURE_STRING','');
+});
+
 Before({tags: "@FEATURE_STRING_NULL"}, async function () {
     await setFeatureToNotSet('FEATURE_STRING');
+});
+
+Before({tags: "@FEATURE_NUMBER_1"}, async function () {
+    await updateFeature('FEATURE_NUMBER', 1);
+});
+
+Before({tags: "@FEATURE_NUMBER_500"}, async function () {
+    await updateFeature('FEATURE_NUMBER', 500);
+});
+
+Before({tags: "@FEATURE_JSON_BAR"}, async function () {
+    await updateFeature('FEATURE_JSON', JSON.parse("foo:bar"));
+});
+
+Before({tags: "@FEATURE_JSON_BAZ"}, async function () {
+    await updateFeature('FEATURE_JSON', JSON.parse("foo:bar"));
 });
 
 Before({tags: "@FEATURE_NUMBER_NULL"}, async function () {

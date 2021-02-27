@@ -81,17 +81,17 @@ class TodoController implements ITodoApiController {
 
   processTitle(title: string) {
 
-    if (this.repo.isSet('FEATURE_STRING') != null && title == 'buy') {
+    if (this.repo.isSet('FEATURE_STRING') && title == 'buy') {
       title = `${title} ${this.repo.getString('FEATURE_STRING')}`;
       console.log('Processes string feature', title);
     }
 
-    if (this.repo.isSet('FEATURE_NUMBER') != null && title == 'pay $') {
-      title = `${title}${this.repo.getNumber('FEATURE_NUMBER').toString()}`;
+    if (this.repo.isSet('FEATURE_NUMBER') && title == 'pay') {
+      title = `${title} ${this.repo.getNumber('FEATURE_NUMBER').toString()}`;
       console.log('Processed number feature', title);
     }
 
-    if (this.repo.isSet('FEATURE_JSON') != null && title == 'find') {
+    if (this.repo.isSet('FEATURE_JSON') && title == 'find') {
       const json = JSON.parse(this.repo.getJson('FEATURE_JSON'));
       title = `${title} ${json['foo']}`; // expecting {"foo":"bar"}
       console.log('Processed JSON feature', title);
@@ -110,8 +110,7 @@ class TodoController implements ITodoApiController {
   }
 
   async removeTodos(parameters: { user: string }): Promise<Array<Todo>> {
-    todos = [];
-    return todos;
+    return todos.splice(0, todos.length);
   }
 }
 
