@@ -1,4 +1,26 @@
+function getSDKUrl(): string {
+    let sdkUrl;
+
+    if (process.env.FEATUREHUB_APP_ENV_URL === undefined) {
+        console.error('You must define the FeatureHub SDK URL for your application environment in the environment variable FEATUREHUB_APP_ENV_URL');
+        process.exit(-1);
+    } else sdkUrl = process.env.FEATUREHUB_APP_ENV_URL;
+
+    return sdkUrl;
+}
+
+function getApplicationServerUrl(): string {
+    let appUrl;
+
+    if (process.env.APP_SERVER_URL === undefined) {
+        console.error('You must define the Application server URL under test in the environment variable APP_SERVER_URL');
+        process.exit(-1);
+    } else appUrl = process.env.APP_SERVER_URL;
+
+    return appUrl;
+}
+
 export class Config {
-    public static baseApplicationPath="http://localhost:8099";
-    public static sdkUrl="http://localhost:8085/features/default/4148dcad-b9e2-40d9-9f4f-d1322f899583/Gv5pom5e0JKVlphnsj0NMIwLxAAkB7GAPC91Y92fbb7Pj5SAeAK8JlnGy4PaREA4OsnxxfbdVGIAEW5O";
+    public static baseApplicationPath = getApplicationServerUrl();
+    public static sdkUrl = getSDKUrl();
 }

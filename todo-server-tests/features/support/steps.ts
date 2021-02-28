@@ -19,6 +19,7 @@ Then("my list of todos should contain {string}", async function (todoDescription
         return {responseData, todo};
     }
 
+    waitForExpect.defaults.timeout = 10000;
     await waitForExpect(async () => {
         const {responseData, todo} = await extracted.call(this);
         expect(todo, `Expected ${todoDescription} but found in the response: ${responseData[0].title}`).to.exist;

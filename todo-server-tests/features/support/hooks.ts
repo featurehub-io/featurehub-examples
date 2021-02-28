@@ -1,26 +1,27 @@
 const {Before, After} = require("@cucumber/cucumber");
-import {FeatureUpdater, FeatureStateUpdate, featureHubRepository} from "featurehub-repository/dist";
+import {FeatureUpdater, FeatureStateUpdate} from "featurehub-repository/dist";
 import {Config} from "./config";
 import {expect} from "chai";
 
+
 Before({tags: "@FEATURE_TITLE_TO_UPPERCASE"}, async function () {
-    await updateFeature('FEATURE_TITLE_TO_UPPERCASE',true);
+    await updateFeature('FEATURE_TITLE_TO_UPPERCASE', true);
 });
 
 After({tags: "@FEATURE_TITLE_TO_UPPERCASE"}, async function () {
-    await updateFeature('FEATURE_TITLE_TO_UPPERCASE',false);
+    await updateFeature('FEATURE_TITLE_TO_UPPERCASE', false);
 });
 
 Before({tags: "@FEATURE_STRING_MILK"}, async function () {
-    await updateFeature('FEATURE_STRING','milk');
+    await updateFeature('FEATURE_STRING', 'milk');
 });
 
 Before({tags: "@FEATURE_STRING_BREAD"}, async function () {
-    await updateFeature('FEATURE_STRING','bread');
+    await updateFeature('FEATURE_STRING', 'bread');
 });
 
 Before({tags: "@FEATURE_STRING_EMPTY"}, async function () {
-    await updateFeature('FEATURE_STRING','');
+    await updateFeature('FEATURE_STRING', '');
 });
 
 Before({tags: "@FEATURE_STRING_NULL"}, async function () {

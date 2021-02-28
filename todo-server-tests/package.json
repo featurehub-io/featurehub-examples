@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Integration tests for FeatureHub SDKs (server-side)",
   "scripts": {
-    "compile": "node_modules/.bin/tsc",
-    "test": "node_modules/.bin/cucumber-js",
+    "test": "cucumber-js --require-module ts-node/register --require 'features/support/*.ts'",
     "generate:specs": "openapi-generator-cli generate -g typescript-axios -i ../todo-api/todo-api.yaml -o ./src/client-axios"
   },
   "author": "FeatureHub.io",

@@ -7,6 +7,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
+    "outDir": "dist",
     "strictNullChecks": false,
     "typeRoots" : ["./node_modules/@types"],
     "lib": ["dom", "es2015", "es2016"],

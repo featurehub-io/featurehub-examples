@@ -1,8 +1,11 @@
 import globalAxios from "axios";
 
 const { setWorldConstructor } = require("@cucumber/cucumber");
+const {setDefaultTimeout} = require('@cucumber/cucumber');
+setDefaultTimeout(30 * 1000);
 
 class CustomWorld {
+
     private variable: number;
     private user: string;
     constructor() {
