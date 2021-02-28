@@ -16,10 +16,6 @@ using FeatureHubSDK;
 using IO.FeatureHub.SSE.Model;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Newtonsoft.Json;
 using ToDoAspCore.Attributes;
 using ToDoAspCore.Models;
 using ToDoAspCore.Services;
@@ -57,7 +53,7 @@ namespace ToDoAspCore.Controllers
         [ValidateModelState]
         [SwaggerOperation("AddTodo")]
         [SwaggerResponse(statusCode: 201, type: typeof(List<Todo>), description: "")]
-        public virtual IActionResult AddTodo([FromRoute][Required]string user, [FromBody]Todo todo)
+        public virtual async Task<IActionResult> AddTodo([FromRoute][Required]string user, [FromBody]Todo todo)
         {
             if (todo.Id == null)
             {
@@ -67,9 +63,8 @@ namespace ToDoAspCore.Controllers
             var todos = GetTodosForUser(user);
             
             todos.Add(todo);
-            
-            var result = new ObjectResult(todos);
-            result.StatusCode = 201;
+
+            var result = new ObjectResult(await TransformTodos(user, todos)) {StatusCode = 201};
             return result;
         }
 
@@ -108,8 +103,7 @@ namespace ToDoAspCore.Controllers
         public virtual async Task<IActionResult> ListTodos([FromRoute] [Required] string user)
         {
             var todos = await TransformTodos(user, GetTodosForUser(user));
-            var result = new ObjectResult(todos);
-            result.StatusCode = 200;
+            var result = new ObjectResult(todos) {StatusCode = 200};
             return result;
         }
 
@@ -140,12 +134,11 @@ namespace ToDoAspCore.Controllers
         [ValidateModelState]
         [SwaggerOperation("RemoveTodo")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Todo>), description: "")]
-        public virtual IActionResult RemoveTodo([FromRoute][Required]string user, [FromRoute][Required]string id)
+        public virtual async Task<IActionResult> RemoveTodo([FromRoute][Required]string user, [FromRoute][Required]string id)
         {
             var todos = GetTodosForUser(user);
             todos.RemoveAll((t) => t.Id == id);
-            var result = new ObjectResult(todos);
-            result.StatusCode = 200;
+            var result = new ObjectResult(await TransformTodos(user, todos)) {StatusCode = 200};
             return result;
         }
 
@@ -160,7 +153,7 @@ namespace ToDoAspCore.Controllers
         [ValidateModelState]
         [SwaggerOperation("ResolveTodo")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Todo>), description: "")]
-        public virtual IActionResult ResolveTodo([FromRoute][Required]string id, [FromRoute][Required]string user)
+        public virtual async Task<IActionResult> ResolveTodo([FromRoute][Required]string id, [FromRoute][Required]string user)
         {
             var todos = GetTodosForUser(user);
             foreach (var todo in todos)
@@ -170,9 +163,8 @@ namespace ToDoAspCore.Controllers
                     todo.Resolved = true;
                 }
             }
-            
-            var result = new ObjectResult(todos);
-            result.StatusCode = 200;
+
+            var result = new ObjectResult(await TransformTodos(user, todos)) {StatusCode = 200};
             return result;
         }
     }
