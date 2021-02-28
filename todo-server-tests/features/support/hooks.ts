@@ -37,15 +37,19 @@ Before({tags: "@FEATURE_NUMBER_500"}, async function () {
 });
 
 Before({tags: "@FEATURE_JSON_BAR"}, async function () {
-    await updateFeature('FEATURE_JSON', JSON.parse("foo:bar"));
+    await updateFeature('FEATURE_JSON', JSON.stringify({foo: "bar"}));
 });
 
 Before({tags: "@FEATURE_JSON_BAZ"}, async function () {
-    await updateFeature('FEATURE_JSON', JSON.parse("foo:bar"));
+    await updateFeature('FEATURE_JSON', JSON.stringify({foo: "baz"}));
 });
 
 Before({tags: "@FEATURE_NUMBER_NULL"}, async function () {
     await setFeatureToNotSet('FEATURE_NUMBER');
+});
+
+Before({tags: "@FEATURE_JSON_NULL"}, async function () {
+    await setFeatureToNotSet('FEATURE_JSON');
 });
 
 async function updateFeature(name: string, newValue: any) {

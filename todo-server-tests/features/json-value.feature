@@ -13,3 +13,10 @@ Feature: Checks json feature
     And I wipe my list of todos
     When I have added a new to-do item "find"
     Then my list of todos should contain "find baz"
+
+  @FEATURE_JSON_NULL
+  Scenario: Test null json value
+    Given I have a user called "Wilma"
+    And I wipe my list of todos
+    When I have added a new to-do item "find"
+    Then my list of todos should contain "find"
