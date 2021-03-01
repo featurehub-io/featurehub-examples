@@ -37,3 +37,27 @@ When("I have added a new to-do item {string}", async function (todoDescription: 
     };
     await todoApi.addTodo(this.user, todo);
 });
+
+Given("I set the flag {string} to {string}", async function (featureKey: string, featureValue: string) {
+    await this.unlockAndUpdateFeature(featureKey, featureValue);
+});
+
+Then("I should not be able to update the value", function () {
+  expect(this.getFeatureUpdateResponse()).to.equal(false);
+});
+
+Given("I lock the feature {string}", async function (featureKey: string) {
+  await this.lockFeature(featureKey);
+});
+
+When("I attempt to update feature {string} to boolean value {string}", async function (featureKey: string, value: boolean) {
+  await this.updateFeatureOnlyValue(featureKey, value)
+});
+
+When("I attempt to update feature {string} to number value {string}", async function (featureKey: string, value: number) {
+    await this.updateFeatureOnlyValue(featureKey, value)
+});
+
+When("I attempt to update feature {string} to string value {string}", async function (featureKey: string, value: string) {
+    await this.updateFeatureOnlyValue(featureKey, value)
+});
