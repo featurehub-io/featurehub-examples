@@ -1,0 +1,27 @@
+== Prerequisites:
+Requires to setup the following features in the FeatureHub Admin Console:
+
+* FEATURE_TITLE_TO_UPPERCASE (boolean)
+* FEATURE_NUMBER (number)
+* FEATURE_STRING (string)
+* FEATURE_JSON (json)
+
+The values can be left as "not set", as they are controlled from the tests.
+
+Set environment variables for the tests:
+
+`APP_SERVER_URL` - the backend server under test.
+`FEATUREHUB_APP_ENV_URL` - the FeatureHub SDK Url that can be obtained from the admin console for your application test environment. Make sure you enable all the permissions, lock, unlock, read, write
+
+Example:
+`APP_SERVER_URL=http://localhost:8099`
+
+`FEATUREHUB_APP_ENV_URL=http://localhost:8085/features/default/4148dcad-b9e2-40d9-9f4f-d1322f899583/Gv5pom5e0JKVlphnsj0NMIwLxAAkB7GAPC91Y92fbb7Pj5SAeAK8JlnGy4PaREA4OsnxxfbdVGIAEW5O`
+
+== To run the tests:
+
+npm install
+npm run generate:specs
+``APP_SERVER_URL='your-server-url' FEATUREHUB_APP_ENV_URL='your-sdk-url' npm run test
+``
+

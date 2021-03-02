@@ -21,24 +21,29 @@ export class Todo {
 
 export interface ITodoApiController {
   resolveTodo(parameters: {
+    'user': string,
     'id': string,
   }): Promise<Array<Todo>>
-
   removeTodo(parameters: {
+    'user': string,
     'id': string,
   }): Promise<Array<Todo>>
-
+  removeTodos(parameters: {
+    'user': string,
+  }): Promise<Array<Todo>>
   addTodo(parameters: {
+    'user': string,
     'body'?: Todo,
   }): Promise<Array<Todo>>
-
-  getTodos(parameters: {}): Promise<Array<Todo>>
+  getTodos(parameters: {
+    'user': string,
+  }): Promise<Array<Todo>>
 }
 
 export type ControllerHandler = (req: Request) => ITodoApiController;
 
 export class TodoApiRouter {
-  private api: Server;
+  private readonly api: Server;
 
   private restifyHttpMethods = {
     POST: 'post',
@@ -55,8 +60,9 @@ export class TodoApiRouter {
   }
 
   registerRoutes() {
-    this.api[this.restifyHttpMethods['PUT']]('/todo/{id}/resolve'.replace(/{(.*?)}/g, ':$1'), (req: restify.Request, res: restify.Response, next: restify.Next) => {
+    this.api[this.restifyHttpMethods['PUT']]('/todo/{user}/{id}/resolve'.replace(/{(.*?)}/g, ':$1'), (req: restify.Request, res: restify.Response, next: restify.Next) => {
       this.controllerFunc(req).resolveTodo({
+        'user': req.params['user'],
         'id': req.params['id'],
       }).then((result) => {
         res.send(result);
@@ -66,9 +72,9 @@ export class TodoApiRouter {
         next();
       });
     });
-
-    this.api[this.restifyHttpMethods['DELETE']]('/todo/{id}/remove'.replace(/{(.*?)}/g, ':$1'), (req: restify.Request, res: restify.Response, next: restify.Next) => {
-	    this.controllerFunc(req).removeTodo({
+    this.api[this.restifyHttpMethods['DELETE']]('/todo/{user}/{id}'.replace(/{(.*?)}/g, ':$1'), (req: restify.Request, res: restify.Response, next: restify.Next) => {
+      this.controllerFunc(req).removeTodo({
+        'user': req.params['user'],
         'id': req.params['id'],
       }).then((result) => {
         res.send(result);
@@ -78,9 +84,20 @@ export class TodoApiRouter {
         next();
       });
     });
-
-    this.api[this.restifyHttpMethods['POST']]('/todo/add'.replace(/{(.*?)}/g, ':$1'), (req: restify.Request, res: restify.Response, next: restify.Next) => {
-	    this.controllerFunc(req).addTodo({
+    this.api[this.restifyHttpMethods['DELETE']]('/todo/{user}'.replace(/{(.*?)}/g, ':$1'), (req: restify.Request, res: restify.Response, next: restify.Next) => {
+      this.controllerFunc(req).removeTodos({
+        'user': req.params['user'],
+      }).then((result) => {
+        res.send(result);
+        next();
+      }).catch(() => {
+        res.send(500);
+        next();
+      });
+    });
+    this.api[this.restifyHttpMethods['POST']]('/todo/{user}'.replace(/{(.*?)}/g, ':$1'), (req: restify.Request, res: restify.Response, next: restify.Next) => {
+      this.controllerFunc(req).addTodo({
+        'user': req.params['user'],
         body: req.body,
       }).then((result) => {
         res.send(result);
@@ -90,9 +107,9 @@ export class TodoApiRouter {
         next();
       });
     });
-
-    this.api[this.restifyHttpMethods['GET']]('/todo/list'.replace(/{(.*?)}/g, ':$1'), (req: restify.Request, res: restify.Response, next: restify.Next) => {
-	    this.controllerFunc(req).getTodos({}).then((result) => {
+    this.api[this.restifyHttpMethods['GET']]('/todo/{user}'.replace(/{(.*?)}/g, ':$1'), (req: restify.Request, res: restify.Response, next: restify.Next) => {
+      this.controllerFunc(req).getTodos({'user': req.params['user'],
+      }).then((result) => {
         res.send(result);
         next();
       }).catch(() => {

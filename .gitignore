@@ -77,3 +77,5 @@ metric*.log
 
 released-pom.xml
 node-js
+/todo-server-tests/node_modules/
+/todo-server-tests/dist/
