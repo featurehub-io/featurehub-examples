@@ -3,7 +3,7 @@
     "rootDir": "app",
     "outDir": "dist",
     "target": "ES6",
-    "module": "commonjs",
+    "module": "ES2020",
     "sourceMap": true,
     "removeComments": false,
     "moduleResolution": "node",
