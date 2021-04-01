@@ -3,15 +3,16 @@
     "rootDir": "app",
     "outDir": "dist",
     "target": "ES6",
-    "module": "ES2020",
+    "module": "commonjs",
     "sourceMap": true,
     "removeComments": false,
     "moduleResolution": "node",
     "noImplicitAny": false,
     "declaration": true,
     "preserveConstEnums": true,
-    "skipLibCheck": true
-  },
+    "skipLibCheck": true,
+		"allowSyntheticDefaultImports": true
+	},
   "exclude": ["logs", "node_modules"],
   "include": ["app/**/*"]
 }
