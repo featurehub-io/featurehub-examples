@@ -6,7 +6,7 @@ import {
 	ClientContext,
 	Readyness,
 	featurehubMiddleware
-} from 'featurehub-eventsource-sdk';
+} from 'featurehub-repository';
 // import {
 // 	ClientFeatureRepository,
 // 	EdgeFeatureHubConfig, FeatureHubConfig,
@@ -114,7 +114,7 @@ class TodoController implements ITodoApiController {
 		}
 
 		if (ctx.isEnabled('FEATURE_TITLE_TO_UPPERCASE')) {
-			title = title.toUpperCase();
+			title = title?.toUpperCase();
 			console.log('Processed boolean feature', title);
 
 		}
