@@ -1,23 +1,23 @@
-= A FeatureHub SpringBoot Template
+= The Simple Quarkus Example
 
-This  example simply follows the basics of how a Spring or SpringBoot
-application would be provided for in Java. Java server applications
+This  example simply follows the basics of how a Quarkus
+application could be wired for in Java. Java server applications
 recommend that you expose a health check endpoint, and if you wish
 to have your server not get traffic routed to it by your Application
 Load Balanccer (or whatever your Cloud provider uses), then simply
 fail the health check when FeatureHub is not "ready".
 
 This example is primarily here to provide documentation for the SDK,
-but it operates on its own. You must provide two environment variables
-for it to start.
+but it operates on its own. You must modify the application.properties file for your instance
+of FeatureHub
 
-[source,bash]
+[source,properties]
 ----
-export FEATUREHUB_EDGE_URL=http://localhost:8903/
-export FEATUREHUB_API_KEY=default/3f7a1a34-642b-4054-a82f-1ca2d14633ed/aH0l9TDXzauYq6rKQzVUPwbzmzGRqe*oPqyYqhUlVC50RxAzSmx
+feature-hub.api-key=default/82afd7ae-e7de-4567-817b-dd684315adf7/SHxmTA83AJupii4TsIciWvhaQYBIq2*JxIKxiUoswZPmLQAIIWN
+feature-hub.url=http://localhost:8903
 ----
 
-It recognizes a "Authorization" header which contains the value it will
+It recognizes a "Authorization" header (via the AuthFilter) which contains the value it will
 directly put into the userKey for simplicity to allow you to try out
 percentage rollouts and tagging feature values to users.
 
