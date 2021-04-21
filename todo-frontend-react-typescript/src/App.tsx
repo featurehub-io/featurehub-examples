@@ -2,8 +2,12 @@ import * as React from 'react';
 import { Configuration, DefaultApi, Todo } from './api';
 import './App.css';
 import globalAxios from 'axios';
-import { ClientContext, EdgeFeatureHubConfig, Readyness } from 'featurehub-eventsource-sdk';
-import { FeatureHubEventSourceClient, StrategyAttributeCountryName, StrategyAttributeDeviceName } from 'featurehub-eventsource-sdk';
+import { ClientContext,
+    EdgeFeatureHubConfig,
+    Readyness,
+    FeatureHubEventSourceClient,
+    StrategyAttributeCountryName,
+    GoogleAnalyticsCollector } from 'featurehub-eventsource-sdk';
 
 let todoApi: DefaultApi;
 let initialized = false;
@@ -67,11 +71,11 @@ class App extends React.Component<{}, { todos: TodoData }> {
 
         });
 
-        fhContext
-            .country(StrategyAttributeCountryName.Australia)
-            .build();
+        // fhContext
+        //     .country(StrategyAttributeCountryName.Australia)
+        //     .build();
 
-        // setup the api
+        // connect to the backend server
         todoApi = new DefaultApi(new Configuration({basePath: config.todoServerBaseUrl}));
         this._loadInitialData(); // let this happen in background
 
@@ -80,7 +84,8 @@ class App extends React.Component<{}, { todos: TodoData }> {
             this.setState({todos: this.state.todos.changeColor(fs.getString())});
         });
 
-        // featureHubRepository.addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
+        // connect to Google Analytics
+        // fhConfig.repository().addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
     }
 
     async componentDidMount() {
@@ -104,7 +109,9 @@ class App extends React.Component<{}, { todos: TodoData }> {
             title,
             resolved: false,
         };
-        fhContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']])); // no cid
+
+        // Send an event to Google Analytics
+        fhContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']]));
         const todoResult = (await todoApi.addTodo(todo)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
