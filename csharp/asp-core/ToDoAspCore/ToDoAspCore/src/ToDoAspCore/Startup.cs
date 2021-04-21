@@ -47,16 +47,11 @@ namespace ToDoAspCore
 
         private void AddFeatureHubConfiguration(IServiceCollection services)
         {
-            IFeatureHubConfig config = new FeatureHubConfig(Configuration["FeatureHub:Host"], Configuration["FeatureHub:ApiKey"]);
-            IFeatureRepositoryContext repository = new FeatureHubRepository();
-            var edgeService = new EventServiceListener(repository, config);
-
-            config.Repository = repository;
-            config.EdgeService = edgeService;
+            IFeatureHubConfig config = new EdgeFeatureHubConfig(Configuration["FeatureHub:Host"], Configuration["FeatureHub:ApiKey"]);
 
             services.Add(ServiceDescriptor.Singleton(typeof(IFeatureHubConfig), config));
 
-            edgeService.Init();
+            config.Init();
         }
 
         /// <summary>
@@ -100,6 +95,7 @@ namespace ToDoAspCore
                         },
                         Version = "1.0.0",
                     });
+                    
                     c.CustomSchemaIds(type => type.FriendlyId(true));
                     c.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
 
@@ -107,6 +103,7 @@ namespace ToDoAspCore
                     // Use [ValidateModelState] on Actions to actually validate it in C# as well!
                     c.OperationFilter<GeneratePathParamsValidationFilter>();
                 });
+            
                 services
                     .AddSwaggerGenNewtonsoftSupport();
                 
@@ -130,7 +127,7 @@ namespace ToDoAspCore
             {
                 app.UseHsts();
             }
-
+            
             //app.UseHttpsRedirection();
             app.UseDefaultFiles();
             app.UseStaticFiles();
