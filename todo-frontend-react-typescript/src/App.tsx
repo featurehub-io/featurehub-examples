@@ -71,6 +71,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
 
         });
 
+        // Uncomment this if you want to use rollout strategy with a country rule
         // fhContext
         //     .country(StrategyAttributeCountryName.Australia)
         //     .build();
