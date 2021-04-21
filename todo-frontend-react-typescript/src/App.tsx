@@ -44,7 +44,6 @@ class ConfigData {
 
 class App extends React.Component<{}, { todos: TodoData }> {
     private titleInput: HTMLInputElement;
-    private eventSource: FeatureHubEventSourceClient; // why do we do this?
 
     constructor() {
         super([]);
@@ -99,9 +98,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
     }
 
     componentWillUnmount(): void {
-        if (this.eventSource) {
-            this.eventSource.close();  // do we need to process this?
-        }
+     fhConfig.close(); // tidy up
     }
 
     async addTodo(title: string) {
