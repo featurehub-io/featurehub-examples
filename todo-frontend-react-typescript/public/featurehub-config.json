@@ -1,5 +1,5 @@
 {
   "todoServerBaseUrl": "http://localhost:8099",
-  "fhServerBaseUrl": "http://localhost:8553",
-  "sdkUrl": "default/4e439d38-1e87-4e77-84c3-2a32c112cfc5/Fpy5YpEfTeR5yQ15DUWEyvpQyfpjKHefMq9QhlodNzN8XH4by048X9Vjlj94fPieNc5nkagdfVoeAJxM"
+  "fhEdgeUrl": "http://localhost:8903",
+  "fhApiKey": "default/3f7a1a34-642b-4054-a82f-1ca2d14633ed/4SJ1FNtm4irPfdePtqUJQ4ebOFXvPFXcRcx9OWDa"
 }

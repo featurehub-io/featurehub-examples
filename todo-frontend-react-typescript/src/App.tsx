@@ -2,33 +2,13 @@ import * as React from 'react';
 import { Configuration, DefaultApi, Todo } from './api';
 import './App.css';
 import globalAxios from 'axios';
-import {
-    FeatureContext,
-    FeatureHubPollingClient,
-    featureHubRepository,
-    FeatureStateHolder,
-    FeatureUpdater,
-    Readyness,
-    StrategyAttributeCountryName,
-    StrategyAttributeDeviceName
-} from 'featurehub-repository/dist';
-import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
-
-declare global {
-    interface Window {
-        FeatureUpdater: any;
-        PollingService: any;
-        Repository: any;
-    }
-}
-
-window.FeatureUpdater = FeatureUpdater;
-window.PollingService = FeatureHubPollingClient;
-window.Repository = featureHubRepository;
+import { ClientContext, EdgeFeatureHubConfig, Readyness } from 'featurehub-eventsource-sdk';
+import { FeatureHubEventSourceClient, StrategyAttributeCountryName, StrategyAttributeDeviceName } from 'featurehub-eventsource-sdk';
 
 let todoApi: DefaultApi;
-
 let initialized = false;
+let fhConfig: EdgeFeatureHubConfig;
+let fhContext: ClientContext;
 
 class TodoData {
     todos: Array<Todo>;
@@ -54,13 +34,13 @@ class TodoData {
 
 class ConfigData {
     todoServerBaseUrl: string;
-    fhServerBaseUrl: string;
-    sdkUrl: string;
+    fhEdgeUrl: string;
+    fhApiKey: string;
 }
 
 class App extends React.Component<{}, { todos: TodoData }> {
     private titleInput: HTMLInputElement;
-    private eventSource: FeatureHubEventSourceClient;
+    private eventSource: FeatureHubEventSourceClient; // why do we do this?
 
     constructor() {
         super([]);
@@ -71,37 +51,32 @@ class App extends React.Component<{}, { todos: TodoData }> {
     }
 
     async initializeFeatureHub() {
-        if (featureHubRepository.readyness === Readyness.Ready || this.eventSource) {
-            return;
-        }
-        featureHubRepository.addReadynessListener((readyness) => {
+
+        const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
+        fhConfig = new EdgeFeatureHubConfig(config.fhEdgeUrl, config.fhApiKey);
+
+        fhContext = await fhConfig.newContext().build();
+        fhConfig.repository().addReadynessListener((readyness) => {
             if (!initialized) {
-                console.log('readyness', readyness);
                 if (readyness === Readyness.Ready) {
                     initialized = true;
-                    const color = featureHubRepository.getString('SUBMIT_COLOR_BUTTON');
+                    const color = fhContext.getString('SUBMIT_COLOR_BUTTON');
                     this.setState({todos: this.state.todos.changeColor(color)});
                 }
             }
+
         });
 
-        featureHubRepository.clientContext.userKey('auntie')
-            .country(StrategyAttributeCountryName.NewZealand)
-            .device(StrategyAttributeDeviceName.Browser)
+        fhContext
+            .country(StrategyAttributeCountryName.Australia)
             .build();
 
-        // load the config from the config json file
-        const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
         // setup the api
         todoApi = new DefaultApi(new Configuration({basePath: config.todoServerBaseUrl}));
         this._loadInitialData(); // let this happen in background
 
-        // listen for features from the specified SDK Url for a given environment
-        this.eventSource = new FeatureHubEventSourceClient(`${config.fhServerBaseUrl}/features/${config.sdkUrl}`);
-        this.eventSource.init();
-
         // react to incoming feature changes in real-time
-        featureHubRepository.getFeatureState('SUBMIT_COLOR_BUTTON').addListener((fs: FeatureStateHolder) => {
+        fhConfig.repository().feature('SUBMIT_COLOR_BUTTON').addListener(fs => {
             this.setState({todos: this.state.todos.changeColor(fs.getString())});
         });
 
@@ -119,7 +94,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
 
     componentWillUnmount(): void {
         if (this.eventSource) {
-            this.eventSource.close();
+            this.eventSource.close();  // do we need to process this?
         }
     }
 
@@ -129,14 +104,13 @@ class App extends React.Component<{}, { todos: TodoData }> {
             title,
             resolved: false,
         };
-
-        FeatureContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']])); // no cid
+        fhContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']])); // no cid
         const todoResult = (await todoApi.addTodo(todo)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async removeToDo(id: string) {
-        FeatureContext.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
+        fhContext.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
         const todoResult = (await todoApi.removeTodo(id)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
