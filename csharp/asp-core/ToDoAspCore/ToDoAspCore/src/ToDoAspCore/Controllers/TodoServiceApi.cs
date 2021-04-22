@@ -15,13 +15,14 @@ using System.Threading.Tasks;
 using FeatureHubSDK;
 using IO.FeatureHub.SSE.Model;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using ToDoAspCore.Attributes;
 using ToDoAspCore.Models;
 using ToDoAspCore.Services;
 
 namespace ToDoAspCore.Controllers
-{ 
+{
     /// <summary>
     /// 
     /// </summary>
@@ -41,7 +42,7 @@ namespace ToDoAspCore.Controllers
         {
             return _todoServiceRepository.UsersTodos(user);
         }
-        
+
         /// <summary>
         /// addTodo
         /// </summary>
@@ -53,7 +54,7 @@ namespace ToDoAspCore.Controllers
         [ValidateModelState]
         [SwaggerOperation("AddTodo")]
         [SwaggerResponse(statusCode: 201, type: typeof(List<Todo>), description: "")]
-        public virtual async Task<IActionResult> AddTodo([FromRoute][Required]string user, [FromBody]Todo todo)
+        public virtual async Task<IActionResult> AddTodo([FromRoute] [Required] string user, [FromBody] Todo todo)
         {
             if (todo.Id == null)
             {
@@ -61,7 +62,7 @@ namespace ToDoAspCore.Controllers
             }
 
             var todos = GetTodosForUser(user);
-            
+
             todos.Add(todo);
 
             var result = new ObjectResult(await TransformTodos(user, todos)) {StatusCode = 201};
@@ -70,24 +71,61 @@ namespace ToDoAspCore.Controllers
 
         private async Task<List<Todo>> TransformTodos(string user, List<Todo> todos)
         {
-            var ctx = await _featureHub.NewContext().UserKey(user).Platform(StrategyAttributePlatformName.Macos).Build();
-            if (ctx["FEATURE_TITLE_TO_UPPERCASE"].IsEnabled)
+            var ctx = await _featureHub.NewContext().UserKey(user).Platform(StrategyAttributePlatformName.Macos)
+                .Build();
+            var t = new List<Todo>();
+            foreach (var todo in todos)
             {
-                var t = new List<Todo>();
-                foreach (var todo in todos)
-                {
-                    var nTodo = new Todo();
-                    nTodo.Id = todo.Id;
-                    nTodo.Resolved = todo.Resolved;
-                    nTodo.Title = todo.Title.ToUpper();
-                    nTodo.When = todo.When;
-                    t.Add(nTodo);
-                }
-
-                return t;
+                var nTodo = new Todo();
+                nTodo.Id = todo.Id;
+                nTodo.Resolved = todo.Resolved;
+                nTodo.Title = _ProcessTitle(ctx, todo.Title);
+                nTodo.When = todo.When;
+                t.Add(nTodo);
             }
-            
-            return todos;
+
+            return t;
+        }
+
+        private string _ProcessTitle(IClientContext ctx, string title)
+        {
+            if (title == null)
+            {
+                return null;
+            }
+
+            if (ctx == null)
+            {
+                return title;
+            }
+
+            if (ctx.IsSet("FEATURE_STRING") && "buy" == title)
+            {
+                title = title + " " + ctx["FEATURE_STRING"].StringValue;
+                // log.debug("Processes string feature: {}", title);
+            }
+
+            if (ctx.IsSet("FEATURE_NUMBER") && title == "pay")
+            {
+                title = title + " " + ctx["FEATURE_NUMBER"].NumberValue.ToString();
+                // log.debug("Processed number feature {}", title);
+            }
+
+            if (ctx.IsSet("FEATURE_JSON") && title == "find")
+            {
+                var feat = JsonConvert.DeserializeObject<Dictionary<string, string>>(ctx["FEATURE_JSON"].JsonValue);
+
+                title = title + " " + (feat.ContainsKey("foo") ? feat["foo"] : ""); 
+                // log.debug("Processed JSON feature {}", title);
+            }
+
+            if (ctx.IsEnabled("FEATURE_TITLE_TO_UPPERCASE"))
+            {
+                title = title.ToUpper();
+                // log.debug("Processed boolean feature {}", title);
+            }
+
+            return title;
         }
 
         /// <summary>
@@ -116,8 +154,8 @@ namespace ToDoAspCore.Controllers
         [Route("/todo/{user}")]
         [ValidateModelState]
         [SwaggerOperation("RemoveAllTodos")]
-        public virtual IActionResult RemoveAllTodos([FromRoute][Required]string user)
-        { 
+        public virtual IActionResult RemoveAllTodos([FromRoute] [Required] string user)
+        {
             GetTodosForUser(user).Clear();
 
             return StatusCode(204);
@@ -134,7 +172,8 @@ namespace ToDoAspCore.Controllers
         [ValidateModelState]
         [SwaggerOperation("RemoveTodo")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Todo>), description: "")]
-        public virtual async Task<IActionResult> RemoveTodo([FromRoute][Required]string user, [FromRoute][Required]string id)
+        public virtual async Task<IActionResult> RemoveTodo([FromRoute] [Required] string user,
+            [FromRoute] [Required] string id)
         {
             var todos = GetTodosForUser(user);
             todos.RemoveAll((t) => t.Id == id);
@@ -153,7 +192,8 @@ namespace ToDoAspCore.Controllers
         [ValidateModelState]
         [SwaggerOperation("ResolveTodo")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Todo>), description: "")]
-        public virtual async Task<IActionResult> ResolveTodo([FromRoute][Required]string id, [FromRoute][Required]string user)
+        public virtual async Task<IActionResult> ResolveTodo([FromRoute] [Required] string id,
+            [FromRoute] [Required] string user)
         {
             var todos = GetTodosForUser(user);
             foreach (var todo in todos)
