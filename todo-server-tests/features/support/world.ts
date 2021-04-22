@@ -1,19 +1,15 @@
 import globalAxios from "axios";
-import { FeatureStateUpdate, FeatureUpdater, EdgeFeatureHubConfig, FeatureStateHolder } from "featurehub-eventsource-sdk";
+import { FeatureStateUpdate, FeatureUpdater, FeatureStateHolder } from "featurehub-eventsource-sdk";
 import { Config } from "./config";
-import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
-import {expect} from "chai";
+import { expect } from "chai";
 import waitForExpect from "wait-for-expect";
-const {Before, After, AfterAll} = require("@cucumber/cucumber");
+const { AfterAll } = require("@cucumber/cucumber");
 
 
 const { setWorldConstructor } = require("@cucumber/cucumber");
 const { setDefaultTimeout } = require('@cucumber/cucumber');
 setDefaultTimeout(30 * 1000);
 
-
-// const fhConfig  = new EdgeFeatureHubConfig(process.env.FEATUREHUB_EDGE_URL, process.env.FEATUREHUB_API_KEY);
-// fhConfig.init();
 
 AfterAll(async function () {
     Config.fhConfig.close();

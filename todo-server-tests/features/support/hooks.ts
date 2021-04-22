@@ -2,7 +2,6 @@ const {Before, After } = require("@cucumber/cucumber");
 import {
     FeatureUpdater,
     FeatureStateUpdate,
-    featurehubMiddleware,
 
 } from "featurehub-eventsource-sdk";
 import {Config} from "./config";

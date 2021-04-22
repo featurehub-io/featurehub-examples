@@ -12,6 +12,7 @@ Set environment variables for the tests:
 
 `APP_SERVER_URL` - the backend server under test.
 `FEATUREHUB_API_KEY` - the FeatureHub API Key that can be obtained from the admin console for your application test environment. Make sure you enable all the permissions, lock, unlock, read, write
+`FEATUREHUB_EDGE_URL` - FeatureHub Edge Url, e.g http://localhost:8903/'
 
 Example:
 `APP_SERVER_URL=http://localhost:8099`
