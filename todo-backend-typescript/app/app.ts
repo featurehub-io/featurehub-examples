@@ -91,17 +91,17 @@ class TodoController implements ITodoApiController {
 
 	processTitle(title: string, ctx: ClientContext) {
 
-		if (ctx.isEnabled('FEATURE_STRING') && title == 'buy') {
+		if (ctx.isSet('FEATURE_STRING') && title == 'buy') {
 			title = `${title} ${ctx.getString('FEATURE_STRING')}`;
 			console.log('Processes string feature', title);
 		}
 
-		if (ctx.isEnabled('FEATURE_NUMBER') && title == 'pay') {
+		if (ctx.isSet('FEATURE_NUMBER') && title == 'pay') {
 			title = `${title} ${ctx.getNumber('FEATURE_NUMBER').toString()}`;
 			console.log('Processed number feature', title);
 		}
 
-		if (ctx.isEnabled('FEATURE_JSON') && title == 'find') {
+		if (ctx.isSet('FEATURE_JSON') && title == 'find') {
 			const json = JSON.parse(ctx.getJson('FEATURE_JSON'));
 			title = `${title} ${json['foo']}`; // expecting {"foo":"bar"}
 			console.log('Processed JSON feature', title);

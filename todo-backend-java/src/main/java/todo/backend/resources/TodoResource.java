@@ -40,16 +40,40 @@ public class TodoResource implements TodoService {
   private List<Todo> getTodoList(Map<String, Todo> todos, String user) {
     ClientContext ctx = ctx(user);
 
-    if (ctx != null && ctx.feature(Features.FEATURE_TITLE_TO_UPPERCASE).isEnabled()) {
-      ctx.logAnalyticsEvent("list-by-uppercase");
-      return todos.values().stream().map(t -> t.copy().title(t.getTitle().toUpperCase())).collect(Collectors.toList());
+    return todos.values().stream().map(t -> t.copy().title(processTitle(ctx, t.getTitle()))).collect(Collectors.toList());
+  }
+
+  private String processTitle(ClientContext ctx, String title) {
+    if (title == null) {
+      return null;
     }
 
-    if (ctx != null) {
-      ctx.logAnalyticsEvent("list-by-mixedcase");
+    if (ctx == null) {
+      return title;
     }
 
-    return new ArrayList<Todo>(todos.values());
+    if (ctx.isSet("FEATURE_STRING") && "buy".equals(title)) {
+      title = title + " " + ctx.feature("FEATURE_STRING").getString();
+      log.debug("Processes string feature: {}", title);
+    }
+
+    if (ctx.isSet("FEATURE_NUMBER") && title.equals("pay")) {
+      title =  title + " " + ctx.feature("FEATURE_NUMBER").getNumber().toString();
+      log.debug("Processed number feature {}", title);
+    }
+
+    if (ctx.isSet("FEATURE_JSON") && title.equals("find")) {
+      final Map feature_json = ctx.feature("FEATURE_JSON").getJson(Map.class);
+      title = title + " " + feature_json.get("foo").toString();
+      log.debug("Processed JSON feature {}", title);
+    }
+
+    if (ctx.isEnabled("FEATURE_TITLE_TO_UPPERCASE")) {
+      title = title.toUpperCase();
+      log.debug("Processed boolean feature {}", title);
+    }
+
+    return title;
   }
 
   private ClientContext ctx(String user) {
