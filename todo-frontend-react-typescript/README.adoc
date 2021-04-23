@@ -20,7 +20,7 @@ Set feature key to `SUBMIT_COLOR_BUTTON`.
  `"fhEdgeUrl": "http://localhost:8903",`
 
 * You are required to have a Service Account created in the FeatureHub Admin Console with the "read" permissions for your desired environment.
-Once this is set, copy the API URL (Client or server eval) from the API Keys page for your desired environment and set it as an environment variable:
+Once this is set, copy the API Key (Server eval key) from the API Keys page for your desired environment and set it as an environment variable:
 
  `"fhApiKey": "default/3f7a1a34-642b-4054-a82f-1ca2d14633ed/4SJ1FNtm4irPfdePtqUJQ4ebOFXvPFXcRcx9OWDa"`
 
