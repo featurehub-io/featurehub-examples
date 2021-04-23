@@ -9,7 +9,8 @@ import {
 	GoogleAnalyticsCollector,
 	StrategyAttributeCountryName,
 	StrategyAttributeDeviceName,
-	StrategyAttributePlatformName
+	StrategyAttributePlatformName,
+	FeatureHubPollingClient
 } from 'featurehub-eventsource-sdk';
 
 if (process.env.FEATUREHUB_EDGE_URL === undefined || process.env.FEATUREHUB_API_KEY === undefined) {
@@ -22,9 +23,13 @@ if (process.env.FEATUREHUB_EDGE_URL === undefined || process.env.FEATUREHUB_API_
 
 const fhConfig = new EdgeFeatureHubConfig(process.env.FEATUREHUB_EDGE_URL, process.env.FEATUREHUB_API_KEY);
 
-//Add override for polling
+// Add override to use polling client
+// const FREQUENCY = 5000; // 5 seconds
+// fhConfig.edgeServiceProvider((repo, config) => new FeatureHubPollingClient(repo, config, FREQUENCY));
 
 fhConfig.init();
+
+// Connect to GA
 // fhConfig.repository().addAnalyticCollector(new GoogleAnalyticsCollector('UA-XXXYYYYY', '1234-5678-abcd-1234'));
 
 
