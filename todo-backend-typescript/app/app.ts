@@ -162,6 +162,7 @@ todoRouter.registerRoutes();
 process.on('SIGINT', () => {
 	console.log('closing FH client');
 	fhConfig.close();
+	api.close(() => console.log('Shut down server...'));
 });
 
 let initialized = false;

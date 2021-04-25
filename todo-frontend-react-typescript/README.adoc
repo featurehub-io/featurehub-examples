@@ -52,11 +52,6 @@ Install dependencies
 
 `npm install`
 
-Generate AXIOS openapi client
-
-`mvn clean generate-sources`
-
-
 Run the back-end server: 
 
 `cd ../todo-backend-typescript`
