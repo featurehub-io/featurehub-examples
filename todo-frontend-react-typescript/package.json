@@ -1,11 +1,11 @@
 {
   "name": "featurehub-react-example",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "immutability-helper": "^3.1.1",
-    "featurehub-eventsource-sdk": "^1.2.0",
+    "featurehub-eventsource-sdk": "^2.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },
@@ -17,9 +17,15 @@
   },
   "devDependencies": {
     "@types/node": "^12.12.0",
-    "react-scripts-ts": "^3.1.0",
     "@types/react": "^16.9.42",
     "@types/react-dom": "^16.9.8",
+    "react-scripts-ts": "^4.0.8",
     "typescript": "^3.9.7"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

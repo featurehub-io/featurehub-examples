@@ -1,5 +1,9 @@
 const {Before, After } = require("@cucumber/cucumber");
-import {FeatureUpdater, FeatureStateUpdate} from "featurehub-repository/dist";
+import {
+    FeatureUpdater,
+    FeatureStateUpdate,
+
+} from "featurehub-eventsource-sdk";
 import {Config} from "./config";
 import {expect} from "chai";
 
@@ -66,7 +70,7 @@ Before({tags: "@FEATURE_JSON_NULL"}, async function () {
 });
 
 async function updateFeature(name: string, newValue: any) {
-    const featureUpdater = new FeatureUpdater(Config.sdkUrl);
+    const featureUpdater = new FeatureUpdater(Config.fhConfig);
     const response = await featureUpdater.updateKey(name, new FeatureStateUpdate({
         lock: false,
         value: newValue,
@@ -75,7 +79,7 @@ async function updateFeature(name: string, newValue: any) {
 }
 
 async function setFeatureToNotSet(name: string) {
-    const featureUpdater = new FeatureUpdater(Config.sdkUrl);
+    const featureUpdater = new FeatureUpdater(Config.fhConfig);
     await featureUpdater.updateKey(name, new FeatureStateUpdate({
         lock: false,
         updateValue: true

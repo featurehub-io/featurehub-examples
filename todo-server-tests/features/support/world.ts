@@ -1,22 +1,18 @@
 import globalAxios from "axios";
-import { FeatureStateUpdate, FeatureUpdater, featureHubRepository } from "featurehub-repository";
+import { FeatureStateUpdate, FeatureUpdater, FeatureStateHolder } from "featurehub-eventsource-sdk";
 import { Config } from "./config";
-import {FeatureStateHolder} from "featurehub-repository/dist";
-import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
-const {Before, After, AfterAll} = require("@cucumber/cucumber");
+import { expect } from "chai";
+import waitForExpect from "wait-for-expect";
+const { AfterAll } = require("@cucumber/cucumber");
 
 
 const { setWorldConstructor } = require("@cucumber/cucumber");
 const { setDefaultTimeout } = require('@cucumber/cucumber');
 setDefaultTimeout(30 * 1000);
-import {expect} from "chai";
-import waitForExpect from "wait-for-expect";
 
-const featureHubEventSourceClient  = new FeatureHubEventSourceClient(process.env.FEATUREHUB_APP_ENV_URL);
-featureHubEventSourceClient.init();
 
 AfterAll(async function () {
-    featureHubEventSourceClient.close();
+    Config.fhConfig.close();
 });
 
 class CustomWorld {
@@ -34,25 +30,25 @@ class CustomWorld {
     }
 
     async updateFeatureOnlyValue(name: string, newValue: any) {
-        const featureUpdater = new FeatureUpdater(Config.sdkUrl);
+        const featureUpdater = new FeatureUpdater(Config.fhConfig);
         this.response =  await featureUpdater.updateKey(name, new FeatureStateUpdate({
             value: newValue,
         }));
     }
 
     async lockFeature(name: string) {
-        const featureUpdater = new FeatureUpdater(Config.sdkUrl);
+        const featureUpdater = new FeatureUpdater(Config.fhConfig);
         await featureUpdater.updateKey(name, new FeatureStateUpdate({
             lock: true,
         }));
 
-        await waitForExpect(async () => { const feature: FeatureStateHolder = featureHubRepository.feature(name);
+        await waitForExpect(async () => { const feature: FeatureStateHolder = Config.fhConfig.repository().feature(name);
         expect(feature.isLocked()).to.equal(true);
         });
     }
 
     async unlockAndUpdateFeature(name: string, newValue: any) {
-        const featureUpdater = new FeatureUpdater(Config.sdkUrl);
+        const featureUpdater = new FeatureUpdater(Config.fhConfig);
         this.response =  await featureUpdater.updateKey(name, new FeatureStateUpdate({
             lock: false,
             value: newValue,

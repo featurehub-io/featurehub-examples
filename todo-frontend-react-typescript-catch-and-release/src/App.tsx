@@ -1,32 +1,17 @@
 import * as React from 'react';
+import { Configuration, DefaultApi, Todo } from './api';
 import './App.css';
 import globalAxios from 'axios';
-import {
-    FeatureContext,
-    FeatureHubPollingClient,
-    featureHubRepository,
-    FeatureStateHolder,
-    FeatureUpdater,
+import { ClientContext,
+    EdgeFeatureHubConfig,
     Readyness,
     StrategyAttributeCountryName,
-    StrategyAttributeDeviceName
-} from 'featurehub-repository/dist';
-import { FeatureHubEventSourceClient } from 'featurehub-eventsource-sdk/dist';
-import { Todo, todoApi } from './local_storage_server';
+    GoogleAnalyticsCollector } from 'featurehub-eventsource-sdk';
 
-declare global {
-    interface Window {
-        FeatureUpdater: any;
-        PollingService: any;
-        Repository: any;
-    }
-}
-
-window.FeatureUpdater = FeatureUpdater;
-window.PollingService = FeatureHubPollingClient;
-window.Repository = featureHubRepository;
-
+let todoApi: DefaultApi;
 let initialized = false;
+let fhConfig: EdgeFeatureHubConfig;
+let fhContext: ClientContext;
 
 class TodoData {
     todos: Array<Todo>;
@@ -53,17 +38,17 @@ class TodoData {
         td.featuresUpdated = fu;
         return td;
     }
+
 }
 
 class ConfigData {
     todoServerBaseUrl: string;
-    fhServerBaseUrl: string;
-    sdkUrl: string;
+    fhEdgeUrl: string;
+    fhApiKey: string;
 }
 
 class App extends React.Component<{}, { todos: TodoData }> {
     private titleInput: HTMLInputElement;
-    private eventSource: FeatureHubEventSourceClient;
 
     constructor() {
         super([]);
@@ -74,43 +59,46 @@ class App extends React.Component<{}, { todos: TodoData }> {
     }
 
     async initializeFeatureHub() {
-        if (featureHubRepository.readyness === Readyness.Ready || this.eventSource) {
-            return;
-        }
-        featureHubRepository.addReadynessListener((readyness) => {
+
+        const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
+        fhConfig = new EdgeFeatureHubConfig(config.fhEdgeUrl, config.fhApiKey);
+
+        fhContext = await fhConfig.newContext().build();
+        fhConfig.repository().addReadynessListener((readyness) => {
             if (!initialized) {
-                console.log('readyness', readyness);
                 if (readyness === Readyness.Ready) {
                     initialized = true;
-                    const color = featureHubRepository.getString('SUBMIT_COLOR_BUTTON');
+                    const color = fhContext.getString('SUBMIT_COLOR_BUTTON');
                     this.setState({todos: this.state.todos.changeColor(color)});
                 }
             }
+
         });
 
         // Using catch & release mechanism
-        featureHubRepository
-          .addPostLoadNewFeatureStateAvailableListener((_) =>
-                                                       this.setState(
-                                                         {todos: this.state.todos.changeFeaturesUpdated(true)}) );
+        fhConfig.repository()
+            .addPostLoadNewFeatureStateAvailableListener(() =>
+                this.setState(
+                    {todos: this.state.todos.changeFeaturesUpdated(true)}) );
 
-        featureHubRepository.catchAndReleaseMode = true; // catch feature updates and release later
+        fhConfig.repository().catchAndReleaseMode = true; // catch feature updates and release later
 
-        featureHubRepository.clientContext.userKey('auntie')
-            .country(StrategyAttributeCountryName.NewZealand)
-            .device(StrategyAttributeDeviceName.Browser)
-            .build();
+        // Uncomment this if you want to use rollout strategy with a country rule
+        // fhContext
+        //     .country(StrategyAttributeCountryName.Australia)
+        //     .build();
 
-        // load the config from the config json file
-        const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
-        // setup the api
+        // connect to the backend server
+        todoApi = new DefaultApi(new Configuration({basePath: config.todoServerBaseUrl}));
         this._loadInitialData(); // let this happen in background
 
-        // listen for features from the specified SDK Url for a given environment
-        this.eventSource = new FeatureHubEventSourceClient(`${config.fhServerBaseUrl}/features/${config.sdkUrl}`);
-        this.eventSource.init();
+        // react to incoming feature changes in real-time
+        fhConfig.repository().feature('SUBMIT_COLOR_BUTTON').addListener(fs => {
+            this.setState({todos: this.state.todos.changeColor(fs.getString())});
+        });
 
-        // featureHubRepository.addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
+        // connect to Google Analytics
+        // fhConfig.repository().addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
     }
 
     async componentDidMount() {
@@ -118,14 +106,12 @@ class App extends React.Component<{}, { todos: TodoData }> {
     }
 
     async _loadInitialData() {
-        const todoResult = (await todoApi.listTodos({}));
+        const todoResult = (await todoApi.listTodos({})).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     componentWillUnmount(): void {
-        if (this.eventSource) {
-            this.eventSource.close();
-        }
+        fhConfig.close(); // tidy up
     }
 
     async addTodo(title: string) {
@@ -135,19 +121,20 @@ class App extends React.Component<{}, { todos: TodoData }> {
             resolved: false,
         };
 
-        FeatureContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']])); // no cid
-        const todoResult = (await todoApi.addTodo(todo));
+        // Send an event to Google Analytics
+        fhContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']]));
+        const todoResult = (await todoApi.addTodo(todo)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async removeToDo(id: string) {
-        FeatureContext.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
-        const todoResult = (await todoApi.removeTodo(id));
+        fhContext.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
+        const todoResult = (await todoApi.removeTodo(id)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async doneToDo(id: string) {
-        const todoResult = (await todoApi.resolveTodo(id));
+        const todoResult = (await todoApi.resolveTodo(id)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
@@ -168,8 +155,8 @@ class App extends React.Component<{}, { todos: TodoData }> {
                 (<div className="updatedFeatures">There are updated features available.
                     <button
                         onClick={async () => {
-                            await featureHubRepository.release();
-                            const newColor = featureHubRepository.getString('SUBMIT_COLOR_BUTTON');
+                            await fhConfig.repository().release();
+                            const newColor = fhContext.getString('SUBMIT_COLOR_BUTTON');
                             this.setState({todos: this.state.todos.changeColor(newColor)});
                         }
                         }

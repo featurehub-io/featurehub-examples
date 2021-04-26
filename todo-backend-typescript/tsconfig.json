@@ -10,8 +10,9 @@
     "noImplicitAny": false,
     "declaration": true,
     "preserveConstEnums": true,
-    "skipLibCheck": true
-  },
+    "skipLibCheck": true,
+		"allowSyntheticDefaultImports": true
+	},
   "exclude": ["logs", "node_modules"],
   "include": ["app/**/*"]
 }

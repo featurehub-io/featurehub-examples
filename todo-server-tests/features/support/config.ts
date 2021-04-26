@@ -1,13 +1,4 @@
-function getSDKUrl(): string {
-    let sdkUrl;
-
-    if (process.env.FEATUREHUB_APP_ENV_URL === undefined) {
-        console.error('You must define the FeatureHub SDK URL for your application environment in the environment variable FEATUREHUB_APP_ENV_URL');
-        process.exit(-1);
-    } else sdkUrl = process.env.FEATUREHUB_APP_ENV_URL;
-
-    return sdkUrl;
-}
+import {EdgeFeatureHubConfig} from "../../../../featurehub-io/sdks/typescript/featurehub-eventsource-sdk";
 
 function getApplicationServerUrl(): string {
     let appUrl;
@@ -20,7 +11,13 @@ function getApplicationServerUrl(): string {
     return appUrl;
 }
 
+function getFhConfig(): EdgeFeatureHubConfig {
+    const fhConfig  = new EdgeFeatureHubConfig(process.env.FEATUREHUB_EDGE_URL, process.env.FEATUREHUB_API_KEY);
+    fhConfig.init();
+    return fhConfig;
+}
+
 export class Config {
     public static baseApplicationPath = getApplicationServerUrl();
-    public static sdkUrl = getSDKUrl();
+    public static fhConfig = getFhConfig();
 }

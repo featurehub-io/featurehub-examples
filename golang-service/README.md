@@ -17,7 +17,7 @@ First you need a FeatureHub server:
 - Add some features
 
 Now run the example golang service:
-- Put your SDK key into the consts in main.go
+- Put your API key into the consts in main.go
 - `go run main.go`
 
 Now hit the service with curl:
