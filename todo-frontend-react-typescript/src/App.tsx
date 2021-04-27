@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Configuration, DefaultApi, Todo } from './api';
+import { Configuration, Todo, TodoServiceApi } from './api';
 import './App.css';
 import globalAxios from 'axios';
 import { ClientContext,
@@ -9,10 +9,13 @@ import { ClientContext,
     StrategyAttributeCountryName,
     GoogleAnalyticsCollector } from 'featurehub-eventsource-sdk';
 
-let todoApi: DefaultApi;
+let todoApi: TodoServiceApi;
 let initialized = false;
 let fhConfig: EdgeFeatureHubConfig;
 let fhContext: ClientContext;
+
+// change this user if you wish to specify a different user for the backend and for the userkey for the features
+const user = 'fred';
 
 class TodoData {
     todos: Array<Todo>;
@@ -76,7 +79,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
         //     .build();
 
         // connect to the backend server
-        todoApi = new DefaultApi(new Configuration({basePath: config.todoServerBaseUrl}));
+        todoApi = new TodoServiceApi(new Configuration({basePath: config.todoServerBaseUrl}));
         this._loadInitialData(); // let this happen in background
 
         // react to incoming feature changes in real-time
@@ -93,7 +96,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
     }
 
     async _loadInitialData() {
-        const todoResult = (await todoApi.listTodos({})).data;
+        const todoResult = (await todoApi.listTodos(user)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
@@ -110,18 +113,18 @@ class App extends React.Component<{}, { todos: TodoData }> {
 
         // Send an event to Google Analytics
         fhContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']]));
-        const todoResult = (await todoApi.addTodo(todo)).data;
+        const todoResult = (await todoApi.addTodo(user, todo)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async removeToDo(id: string) {
         fhContext.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
-        const todoResult = (await todoApi.removeTodo(id)).data;
+        const todoResult = (await todoApi.removeTodo(user, id)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async doneToDo(id: string) {
-        const todoResult = (await todoApi.resolveTodo(id)).data;
+        const todoResult = (await todoApi.resolveTodo(user, id)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 

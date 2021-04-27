@@ -13,15 +13,15 @@ import {
 	FeatureHubPollingClient
 } from 'featurehub-eventsource-sdk';
 
-if (process.env.FEATUREHUB_EDGE_URL === undefined || process.env.FEATUREHUB_API_KEY === undefined) {
-	console.error('You must define the location of your FeatureHub Edge URL in the environment variable FEATUREHUB_EDGE_URL, and your API Key in FEATUREHUB_API_KEY');
+if (process.env.FEATUREHUB_EDGE_URL === undefined || process.env.FEATUREHUB_CLIENT_API_KEY === undefined) {
+	console.error('You must define the location of your FeatureHub Edge URL in the environment variable FEATUREHUB_EDGE_URL, and your API Key in FEATUREHUB_CLIENT_API_KEY');
 	process.exit(-1);
 }
 
 //provide EDGE_URL, e.g. 'http://localhost:8553/'
 //provide API_KEY, e.g. default/ff8635ef-ed28-4cc3-8067-b9ffd8882100/lOopBkGPALBcI0p6AGpf4jAdUi2HxR0RkhYvV00i1XsMQLWkltaoFvEfs7uFsZaQ45kF5FmhGE7rWTSg'
 
-const fhConfig = new EdgeFeatureHubConfig(process.env.FEATUREHUB_EDGE_URL, process.env.FEATUREHUB_API_KEY);
+const fhConfig = new EdgeFeatureHubConfig(process.env.FEATUREHUB_EDGE_URL, process.env.FEATUREHUB_CLIENT_API_KEY);
 
 // Add override to use polling client
 // const FREQUENCY = 5000; // 5 seconds
@@ -44,10 +44,11 @@ api.use(restify.plugins.queryParser());
 api.use(featurehubMiddleware(fhConfig.repository()));
 
 const port = process.env.TODO_PORT || 8099;
-
 let todos: Todo[] = [];
 
 class TodoController implements ITodoApiController {
+  constructor(private readonly req: any) {}
+
 	async resolveTodo(parameters: { id: string, user: string }): Promise<Array<Todo>> {
 		const todo: Todo = todos.find((todo) => todo.id === parameters.id);
 		todo.resolved = true;
@@ -138,7 +139,7 @@ class TodoController implements ITodoApiController {
 		  .build();
 	  **/
 
-		return fhConfig.newContext()
+		return fhConfig.newContext((process.env.FEATUREHUB_ACCEPT_BAGGAGE !== undefined) ? this.req.featureHub : null, fhConfig.edgeServiceProvider() )
 			.userKey(user)
 			.country(StrategyAttributeCountryName.NewZealand)
 			.device(StrategyAttributeDeviceName.Browser)
@@ -155,7 +156,7 @@ class TodoController implements ITodoApiController {
 	}
 }
 
-const todoRouter = new TodoApiRouter(api, (req: any) => new TodoController());
+const todoRouter = new TodoApiRouter(api, (req: any) => new TodoController(req));
 
 todoRouter.registerRoutes();
 
