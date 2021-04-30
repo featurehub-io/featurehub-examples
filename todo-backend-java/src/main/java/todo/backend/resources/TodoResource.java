@@ -88,7 +88,7 @@ public class TodoResource implements TodoService {
 
   @Override
   public List<Todo> addTodo(String user, Todo body) {
-    if (body.getId() == null) {
+    if (body.getId() == null || body.getId().length() == 0) {
       body.id(UUID.randomUUID().toString());
     }
 

@@ -94,6 +94,9 @@ public class Application {
   }
 
   public static void main(String[] args) throws Exception {
+    System.setProperty("jersey.cors.headers", "X-Requested-With,Authorization,Content-type,Accept-Version," +
+      "Content-MD5,CSRF-Token,x-ijt,cache-control,x-featurehub,baggage");
+
     new Application().init();
 	}
 

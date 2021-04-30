@@ -5,9 +5,6 @@ import globalAxios, { AxiosRequestConfig } from 'axios';
 import { ClientContext,
     EdgeFeatureHubConfig,
     Readyness,
-    FeatureHubEventSourceClient,
-    StrategyAttributeCountryName,
-    GoogleAnalyticsCollector,
     w3cBaggageHeader,
     FeatureHubPollingClient,
     } from 'featurehub-eventsource-sdk';
