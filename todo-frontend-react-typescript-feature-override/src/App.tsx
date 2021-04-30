@@ -1,38 +1,35 @@
 import * as React from 'react';
-import { Configuration, DefaultApi, Todo } from './api';
+import { Configuration, TodoServiceApi, Todo } from './api';
 import './App.css';
-import globalAxios, {AxiosRequestConfig} from 'axios';
+import globalAxios, { AxiosRequestConfig } from 'axios';
 import { ClientContext,
     EdgeFeatureHubConfig,
     Readyness,
     FeatureHubEventSourceClient,
     StrategyAttributeCountryName,
     GoogleAnalyticsCollector,
+    w3cBaggageHeader,
+    FeatureHubPollingClient,
     } from 'featurehub-eventsource-sdk';
 
-let todoApi: DefaultApi;
+let todoApi: TodoServiceApi;
 let initialized = false;
 let fhConfig: EdgeFeatureHubConfig;
 let fhContext: ClientContext;
+let userName = 'fred';
 
 class TodoData {
     todos: Array<Todo>;
-    backgroundColor: string;
     ready: boolean = false;
     featuresUpdated: boolean = false;
 
-    constructor(todos?: Array<Todo>, backgroundColor?: string, ready?: boolean) {
+    constructor(todos?: Array<Todo>, ready?: boolean) {
         this.todos = todos || [];
-        this.backgroundColor = backgroundColor || 'blue';
         this.ready = ready || false;
     }
 
-    changeColor(colour: string | undefined): TodoData {
-        return new TodoData(this.todos, colour, true);
-    }
-
     changeTodos(todos: Array<Todo>): TodoData {
-        return new TodoData(todos, this.backgroundColor, this.ready);
+        return new TodoData(todos, this.ready);
     }
 
 }
@@ -44,26 +41,25 @@ class ConfigData {
 }
 
 globalAxios.interceptors.request.use(function (config: AxiosRequestConfig) {
-    const baggage = w3cBaggageHeader({repo: featureHubRepository, header: config.headers.Baggage});
+  if (fhConfig !== undefined) {
+    const baggage = w3cBaggageHeader({ repo: fhConfig.repository(), header: config.headers.Baggage });
     // const baggage = w3cBaggageHeader({});
     if (baggage) {
-        console.log('baggage is ', baggage);
-        config.headers.Baggage = baggage;
+      console.log('baggage is ', baggage);
+      config.headers.Baggage = baggage;
     } else {
-        console.log('no baggage');
+      console.log('no baggage');
     }
-    return config;
+  }
+  return config;
 }, function (error: any) {
     // Do something with request error
     return Promise.reject(error);
 });
 
-var repo: FeatureHubRepository;
-
 class App extends React.Component<{}, { todos: TodoData }> {
     private titleInput: HTMLInputElement;
     private userName: HTMLInputElement;
-    private eventSource: FeatureHubEventSourceClient;
 
     constructor() {
         super([]);
@@ -77,16 +73,20 @@ class App extends React.Component<{}, { todos: TodoData }> {
 
         const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
         fhConfig = new EdgeFeatureHubConfig(config.fhEdgeUrl, config.fhApiKey);
-        const ls = new LocalSessionInterceptor();
-        fhConfig.repository().addValueInterceptor(ls);
 
-        fhContext = await fhConfig.newContext().build();
+        // change to the polling client so there is a difference in the keys seen by the UI vs the backend
+        fhConfig.edgeServiceProvider( (repo, cfg) => new FeatureHubPollingClient(repo, cfg, 300000));
+        // if we were using the featurehub-baggage-userstate dependency, we would add this to allow overrides via GUI
+
+// const ls = new LocalSessionInterceptor();
+// fhConfig.repository().addValueInterceptor(ls);
+
+        fhContext = await fhConfig.newContext().userKey(userName).build();
         fhConfig.repository().addReadynessListener((readyness) => {
             if (!initialized) {
                 if (readyness === Readyness.Ready) {
                     initialized = true;
-                    const color = fhContext.getString('SUBMIT_COLOR_BUTTON');
-                    this.setState({todos: this.state.todos.changeColor(color)});
+                    this.setState({todos: new TodoData([], true)});
                 }
             }
 
@@ -98,13 +98,8 @@ class App extends React.Component<{}, { todos: TodoData }> {
         //     .build();
 
         // connect to the backend server
-        todoApi = new DefaultApi(new Configuration({basePath: config.todoServerBaseUrl}));
+        todoApi = new TodoServiceApi(new Configuration({basePath: config.todoServerBaseUrl}));
         this._loadInitialData(); // let this happen in background
-
-        // react to incoming feature changes in real-time
-        fhConfig.repository().feature('SUBMIT_COLOR_BUTTON').addListener(fs => {
-            this.setState({todos: this.state.todos.changeColor(fs.getString())});
-        });
 
         // connect to Google Analytics
         // fhConfig.repository().addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
@@ -115,7 +110,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
     }
 
     async _loadInitialData() {
-        const todoResult = (await todoApi.listTodos({})).data;
+        const todoResult = (await todoApi.listTodos(userName)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
@@ -132,18 +127,18 @@ class App extends React.Component<{}, { todos: TodoData }> {
 
         // Send an event to Google Analytics
         fhContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']]));
-        const todoResult = (await todoApi.addTodo(todo)).data;
+        const todoResult = (await todoApi.addTodo(userName, todo)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async removeToDo(id: string) {
         fhContext.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
-        const todoResult = (await todoApi.removeTodo(id)).data;
+        const todoResult = (await todoApi.removeTodo(userName, id)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async doneToDo(id: string) {
-        const todoResult = (await todoApi.resolveTodo(id)).data;
+        const todoResult = (await todoApi.resolveTodo(userName, id)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
@@ -155,11 +150,8 @@ class App extends React.Component<{}, { todos: TodoData }> {
                 </div>
             );
         }
-        let backgroundColor = {
-            backgroundColor: this.state.todos.backgroundColor
-        };
         return (
-            <div className="App" style={backgroundColor}>
+            <div className="App">
                 {this.state.todos.featuresUpdated &&
                 (<div className="updatedFeatures">There are updated features available.
                     <button onClick={() => window.location.reload()}>REFRESH</button></div>)}
@@ -177,7 +169,8 @@ class App extends React.Component<{}, { todos: TodoData }> {
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
-                                featureHubRepository.clientContext.userKey(this.userName.value).build();
+                                userName = this.userName.value;
+                                fhContext.userKey(this.userName.value).build();
                             }}
                         >Set name
                         </button>

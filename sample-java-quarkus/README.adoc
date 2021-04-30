@@ -4,7 +4,7 @@ This  example simply follows the basics of how a Quarkus
 application could be wired for in Java. Java server applications
 recommend that you expose a health check endpoint, and if you wish
 to have your server not get traffic routed to it by your Application
-Load Balanccer (or whatever your Cloud provider uses), then simply
+Load Balancer (or whatever your Cloud provider uses), then simply
 fail the health check when FeatureHub is not "ready".
 
 This example is primarily here to provide documentation for the SDK,
@@ -33,3 +33,7 @@ Hello World green1
 curl  -H 'Authorization: irina'  http://localhost:8080
 Hello World blue
 ----
+
+You can start the app with: `mvn compile quarkus:dev`
+
+You m

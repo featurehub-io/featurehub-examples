@@ -8,19 +8,6 @@
   <artifactId>featurehub-react-feature-override-example</artifactId>
   <version>1.1-SNAPSHOT</version>
 
-  <dependencies>
-    <dependency>
-      <groupId>io.featurehub.client</groupId>
-      <artifactId>client-typescript-core</artifactId>
-      <version>1.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>io.featurehub.client</groupId>
-      <artifactId>client-typescript-eventsource</artifactId>
-      <version>1.1-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
-
   <licenses>
     <license>
       <name>MIT</name>
