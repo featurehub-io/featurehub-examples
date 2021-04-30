@@ -23,7 +23,7 @@ public class TodoService implements todo.api.TodoService {
   private static final Logger log = LoggerFactory.getLogger(TodoService.class);
   private final TodoServiceClient client;
   final FeatureRepositoryContext repository;
-  private final FeatureService featureService;
+  final JerseyClient jerseyClient;
   final String sdkRef;
 
   public static TodoService todoService = new TodoService();
@@ -43,22 +43,17 @@ public class TodoService implements todo.api.TodoService {
     }
 
     repository = new ClientFeatureRepository(2);
-    new JerseyClient(new EdgeFeatureHubConfig(edgeUrl, sdkRef), repository);
-
-    System.out.println(edgeUrl + "features/" + sdkRef);
-    log.info("update sdkurl is {}", edgeUrl + "features/" + sdkRef);
+    jerseyClient = new JerseyClient(new EdgeFeatureHubConfig(edgeUrl, sdkRef), repository);
 
     final Client jerseyBuilder = ClientBuilder.newBuilder()
       .register(CommonConfiguration.class)
       .register(LoggingConfiguration.class)
       .build();
 
-    featureService = new FeatureServiceImpl(new ApiClient(jerseyBuilder, edgeUrl + "features"));
-
     String url = System.getProperty("todo.url", "http://localhost:8099");
 
-    if (!url.endsWith("/")) {
-      url += "/";
+    if (url.endsWith("/")) {
+      url = url.substring(0, url.length()-1);
     }
 
     client = new TodoServiceServiceImpl(new ApiClient(jerseyBuilder, url));
@@ -69,7 +64,7 @@ public class TodoService implements todo.api.TodoService {
   }
 
   public void setFeatureState(String key, FeatureStateUpdate update) {
-    featureService.setFeatureState(sdkRef, key, update);
+    jerseyClient.setFeatureState(key, update);
     confirmFeatureState(key, (Boolean)update.getValue());
   }
 

@@ -115,7 +115,7 @@
       <plugin>
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-maven-plugin</artifactId>
-        <version>4.3.0</version>
+        <version>5.1.0</version>
         <executions>
           <execution>
             <id>todo-api</id>
@@ -128,7 +128,7 @@
               <apiPackage>todo.api</apiPackage>
               <modelPackage>todo.model</modelPackage>
               <inputSpec>${project.basedir}/../todo-api/todo-api.yaml</inputSpec>
-              <language>typescript-axios</language>
+              <generatorName>typescript-axios</generatorName>
             </configuration>
           </execution>
         </executions>
