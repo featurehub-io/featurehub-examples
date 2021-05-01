@@ -17,3 +17,4 @@ dist
 target
 /app/generated-interface.d.ts
 /app/app.d.ts
+package-lock.json
