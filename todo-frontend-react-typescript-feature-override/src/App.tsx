@@ -12,7 +12,7 @@ import { ClientContext,
 let todoApi: TodoServiceApi;
 let initialized = false;
 let fhConfig: EdgeFeatureHubConfig;
-let fhContext: ClientContext;
+let fhClient: ClientContext;
 let userName = 'fred';
 
 class TodoData {
@@ -75,11 +75,14 @@ class App extends React.Component<{}, { todos: TodoData }> {
         fhConfig.edgeServiceProvider( (repo, cfg) => new FeatureHubPollingClient(repo, cfg, 300000));
         // if we were using the featurehub-baggage-userstate dependency, we would add this to allow overrides via GUI
 
-// const ls = new LocalSessionInterceptor();
-// fhConfig.repository().addValueInterceptor(ls);
+        // const ls = new LocalSessionInterceptor();
+        // fhConfig.repository().addValueInterceptor(ls);
 
-        fhContext = await fhConfig.newContext().userKey(userName).build();
-        fhConfig.repository().addReadynessListener((readyness) => {
+        // connect to Google Analytics
+        // fhConfig.addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
+
+        fhClient = await fhConfig.newContext().userKey(userName).build();
+        fhConfig.addReadynessListener((readyness) => {
             if (!initialized) {
                 if (readyness === Readyness.Ready) {
                     initialized = true;
@@ -90,7 +93,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
         });
 
         // Uncomment this if you want to use rollout strategy with a country rule
-        // fhContext
+        // fhClient
         //     .country(StrategyAttributeCountryName.Australia)
         //     .build();
 
@@ -98,8 +101,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
         todoApi = new TodoServiceApi(new Configuration({basePath: config.todoServerBaseUrl}));
         this._loadInitialData(); // let this happen in background
 
-        // connect to Google Analytics
-        // fhConfig.repository().addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
+
     }
 
     async componentDidMount() {
@@ -123,13 +125,13 @@ class App extends React.Component<{}, { todos: TodoData }> {
         };
 
         // Send an event to Google Analytics
-        fhContext.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']]));
+        fhClient.logAnalyticsEvent('todo-add', new Map([['gaValue', '10']]));
         const todoResult = (await todoApi.addTodo(userName, todo)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
 
     async removeToDo(id: string) {
-        fhContext.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
+        fhClient.logAnalyticsEvent('todo-remove', new Map([['gaValue', '5']]));
         const todoResult = (await todoApi.removeTodo(userName, id)).data;
         this.setState({todos: this.state.todos.changeTodos(todoResult)});
     }
@@ -167,7 +169,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
                             onClick={(e) => {
                                 e.preventDefault();
                                 userName = this.userName.value;
-                                fhContext.userKey(this.userName.value).build();
+                                fhClient.userKey(this.userName.value).build();
                             }}
                         >Set name
                         </button>

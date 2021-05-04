@@ -30,7 +30,7 @@ const fhConfig = new EdgeFeatureHubConfig(process.env.FEATUREHUB_EDGE_URL, proce
 fhConfig.init();
 
 // Connect to GA
-// fhConfig.repository().addAnalyticCollector(new GoogleAnalyticsCollector('UA-XXXYYYYY', '1234-5678-abcd-1234'));
+// fhConfig.addAnalyticCollector(new GoogleAnalyticsCollector('UA-XXXYYYYY', '1234-5678-abcd-1234'));
 
 
 const api = restify.createServer();
@@ -168,7 +168,7 @@ process.on('SIGINT', () => {
 
 let initialized = false;
 console.log("Waiting for features...");
-fhConfig.repository().addReadynessListener((ready) => {
+fhConfig.addReadynessListener((ready) => {
 	if (!initialized) {
 		if (ready == Readyness.Ready) {
 			console.log("Features are available, starting server...");
