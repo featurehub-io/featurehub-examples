@@ -42,7 +42,7 @@ public class FeatureHubSource implements FeatureHub {
     config.init();
   }
 
-  public ClientContext newContext() {
+  public ClientContext fhClient() {
     return config.newContext();
   }
 

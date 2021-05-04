@@ -3,7 +3,6 @@ package todo.backend.resources;
 import io.featurehub.client.ClientContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import todo.Features;
 import todo.api.TodoService;
 import todo.backend.FeatureHub;
 import todo.model.Todo;
@@ -11,7 +10,6 @@ import todo.model.Todo;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.NotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -38,37 +36,37 @@ public class TodoResource implements TodoService {
   // rather than in the Authorisation token. If it was in the token we would do the context
   // creation in a filter and inject the context instead
   private List<Todo> getTodoList(Map<String, Todo> todos, String user) {
-    ClientContext ctx = ctx(user);
+    ClientContext fhClient = fhClient(user);
 
-    return todos.values().stream().map(t -> t.copy().title(processTitle(ctx, t.getTitle()))).collect(Collectors.toList());
+    return todos.values().stream().map(t -> t.copy().title(processTitle(fhClient, t.getTitle()))).collect(Collectors.toList());
   }
 
-  private String processTitle(ClientContext ctx, String title) {
+  private String processTitle(ClientContext fhClient, String title) {
     if (title == null) {
       return null;
     }
 
-    if (ctx == null) {
+    if (fhClient == null) {
       return title;
     }
 
-    if (ctx.isSet("FEATURE_STRING") && "buy".equals(title)) {
-      title = title + " " + ctx.feature("FEATURE_STRING").getString();
+    if (fhClient.isSet("FEATURE_STRING") && "buy".equals(title)) {
+      title = title + " " + fhClient.feature("FEATURE_STRING").getString();
       log.debug("Processes string feature: {}", title);
     }
 
-    if (ctx.isSet("FEATURE_NUMBER") && title.equals("pay")) {
-      title =  title + " " + ctx.feature("FEATURE_NUMBER").getNumber().toString();
+    if (fhClient.isSet("FEATURE_NUMBER") && title.equals("pay")) {
+      title =  title + " " + fhClient.feature("FEATURE_NUMBER").getNumber().toString();
       log.debug("Processed number feature {}", title);
     }
 
-    if (ctx.isSet("FEATURE_JSON") && title.equals("find")) {
-      final Map feature_json = ctx.feature("FEATURE_JSON").getJson(Map.class);
+    if (fhClient.isSet("FEATURE_JSON") && title.equals("find")) {
+      final Map feature_json = fhClient.feature("FEATURE_JSON").getJson(Map.class);
       title = title + " " + feature_json.get("foo").toString();
       log.debug("Processed JSON feature {}", title);
     }
 
-    if (ctx.isEnabled("FEATURE_TITLE_TO_UPPERCASE")) {
+    if (fhClient.isEnabled("FEATURE_TITLE_TO_UPPERCASE")) {
       title = title.toUpperCase();
       log.debug("Processed boolean feature {}", title);
     }
@@ -76,9 +74,9 @@ public class TodoResource implements TodoService {
     return title;
   }
 
-  private ClientContext ctx(String user) {
+  private ClientContext fhClient(String user) {
     try {
-      return featureHub.newContext().userKey(user).build().get();
+      return featureHub.fhClient().userKey(user).build().get();
     } catch (Exception e) {
       log.error("Unable to get context!");
     }
