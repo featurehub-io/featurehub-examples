@@ -7,5 +7,4 @@ import io.featurehub.client.FeatureRepositoryContext;
 public interface FeatureHub {
   ClientContext newContext();
   FeatureRepositoryContext getRepository();
-  EdgeService getEdgeService();
 }

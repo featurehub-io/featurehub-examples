@@ -23,7 +23,7 @@ public class HealthResource {
 
   @GET
   public Response liveness() {
-    if (config.getRepository().getReadyness() == Readyness.Ready) {
+    if (config.getReadyness() == Readyness.Ready) {
       return Response.ok().build();
     }
 
