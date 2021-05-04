@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="FeatureHub.SDK" Version="2.1.1" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
       <PackageReference Include="Microsoft.OpenApi" Version="1.2.3" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
@@ -16,12 +17,6 @@
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="src\ToDoAspCore\Properties\launchSettings.json" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="FeatureHubSDK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\..\featurehub\sdks\client-csharp\FeatureHubSDK\bin\Release\netstandard2.0\publish\FeatureHubSDK.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 

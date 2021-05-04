@@ -16,7 +16,7 @@ namespace ToDoAspCore.Controllers
         [Route("/health/liveness")]
         public IActionResult Liveness()
         {
-            return fhConfig.Repository.Readyness == Readyness.Ready ? Ok() : StatusCode(503);
+            return fhConfig.Readyness == Readyness.Ready ? Ok() : StatusCode(503);
         }
     }
 }
