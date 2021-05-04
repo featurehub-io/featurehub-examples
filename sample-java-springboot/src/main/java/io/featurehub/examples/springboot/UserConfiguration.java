@@ -12,14 +12,14 @@ import javax.servlet.http.HttpServletRequest;
 public class UserConfiguration {
   @Bean
   @Scope("request")
-  ClientContext featureHubContext(FeatureHubConfig fhConfig, HttpServletRequest request) {
-    ClientContext ctx = fhConfig.newContext();
+  ClientContext featureHubClient(FeatureHubConfig fhConfig, HttpServletRequest request) {
+    ClientContext fhClient = fhConfig.newContext();
 
     if (request.getHeader("Authorization") != null) {
       // you would always authenticate some other way, this is just an example
-      ctx.userKey(request.getHeader("Authorization"));
+      fhClient.userKey(request.getHeader("Authorization"));
     }
 
-    return ctx;
+    return fhClient;
   }
 }

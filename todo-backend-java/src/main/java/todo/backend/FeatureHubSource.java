@@ -23,7 +23,6 @@ public class FeatureHubSource implements FeatureHub {
   String analyticsCid = "";
 
   private final FeatureRepositoryContext repository;
-  private final EdgeService edgeService;
   private final EdgeFeatureHubConfig config;
 
   public FeatureHubSource() {
@@ -39,20 +38,16 @@ public class FeatureHubSource implements FeatureHub {
         new GoogleAnalyticsJerseyApiClient()));
     }
 
-    edgeService = new JerseyClient(config, repository);
+    config.setRepository(repository);
+    config.init();
   }
 
-  public ClientContext newContext() {
-    return config.newContext(repository, () -> edgeService);
+  public ClientContext fhClient() {
+    return config.newContext();
   }
 
   @Override
   public FeatureRepositoryContext getRepository() {
     return repository;
-  }
-
-  @Override
-  public EdgeService getEdgeService() {
-    return edgeService;
   }
 }

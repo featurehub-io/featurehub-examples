@@ -24,7 +24,7 @@ public class HealthResource {
 
   @RequestMapping("/liveness")
   public String liveness() {
-    if (featureHubConfig.getRepository().getReadyness() == Readyness.Ready) {
+    if (featureHubConfig.getReadyness() == Readyness.Ready) {
       return "yes";
     }
 

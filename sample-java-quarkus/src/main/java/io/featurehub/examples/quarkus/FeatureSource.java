@@ -51,7 +51,7 @@ public class FeatureSource {
    */
   @Produces
   @RequestScoped
-  public ClientContext ctx(FeatureHubConfig config) {
+  public ClientContext fhClient(FeatureHubConfig config) {
     try {
       return config.newContext().build().get();
     } catch (Exception e) {
