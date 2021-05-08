@@ -3,7 +3,7 @@ import {
     FeatureUpdater,
     FeatureStateUpdate,
 
-} from "featurehub-eventsource-sdk";
+} from "featurehub-javascript-node-sdk";
 import {Config} from "./config";
 import {expect} from "chai";
 

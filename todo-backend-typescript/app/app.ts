@@ -2,16 +2,16 @@ import * as restify from 'restify';
 import * as corsMiddleware from 'restify-cors-middleware';
 import { ITodoApiController, Todo, TodoApiRouter } from "./generated-interface";
 import {
-	EdgeFeatureHubConfig,
-	ClientContext,
-	Readyness,
-	featurehubMiddleware,
-	GoogleAnalyticsCollector,
-	StrategyAttributeCountryName,
-	StrategyAttributeDeviceName,
-	StrategyAttributePlatformName,
-	FeatureHubPollingClient
-} from 'featurehub-eventsource-sdk';
+  EdgeFeatureHubConfig,
+  ClientContext,
+  Readyness,
+  featurehubMiddleware,
+  GoogleAnalyticsCollector,
+  StrategyAttributeCountryName,
+  StrategyAttributeDeviceName,
+  StrategyAttributePlatformName,
+  FeatureHubPollingClient, fhLog
+} from 'featurehub-javascript-node-sdk';
 
 if (process.env.FEATUREHUB_EDGE_URL === undefined || process.env.FEATUREHUB_CLIENT_API_KEY === undefined) {
 	console.error('You must define the location of your FeatureHub Edge URL in the environment variable FEATUREHUB_EDGE_URL, and your API Key in FEATUREHUB_CLIENT_API_KEY');
@@ -21,6 +21,7 @@ if (process.env.FEATUREHUB_EDGE_URL === undefined || process.env.FEATUREHUB_CLIE
 //provide EDGE_URL, e.g. 'http://localhost:8553/'
 //provide API_KEY, e.g. default/ff8635ef-ed28-4cc3-8067-b9ffd8882100/lOopBkGPALBcI0p6AGpf4jAdUi2HxR0RkhYvV00i1XsMQLWkltaoFvEfs7uFsZaQ45kF5FmhGE7rWTSg'
 
+// fhLog.trace = (...args: any) => console.log(args);
 const fhConfig = new EdgeFeatureHubConfig(process.env.FEATUREHUB_EDGE_URL, process.env.FEATUREHUB_CLIENT_API_KEY);
 
 // Add override to use polling client
@@ -108,7 +109,7 @@ class TodoController implements ITodoApiController {
 		}
 
 		if (ctx.isSet('FEATURE_JSON') && title == 'find') {
-			const json = JSON.parse(ctx.getJson('FEATURE_JSON'));
+			const json = ctx.getJson('FEATURE_JSON');
 			title = `${title} ${json['foo']}`; // expecting {"foo":"bar"}
 			console.log('Processed JSON feature', title);
 		}

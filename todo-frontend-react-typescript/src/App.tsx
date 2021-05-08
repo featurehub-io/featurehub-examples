@@ -7,7 +7,7 @@ import { ClientContext,
     Readyness,
     FeatureHubEventSourceClient,
     StrategyAttributeCountryName,
-    GoogleAnalyticsCollector } from 'featurehub-eventsource-sdk';
+    GoogleAnalyticsCollector } from 'featurehub-javascript-client-sdk';
 
 let todoApi: TodoServiceApi;
 let initialized = false;

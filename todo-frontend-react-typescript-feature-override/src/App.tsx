@@ -7,7 +7,7 @@ import { ClientContext,
     Readyness,
     w3cBaggageHeader,
     FeatureHubPollingClient,
-    } from 'featurehub-eventsource-sdk';
+    } from 'featurehub-javascript-client-sdk';
 
 let todoApi: TodoServiceApi;
 let initialized = false;
