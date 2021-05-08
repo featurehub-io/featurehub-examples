@@ -1,10 +1,10 @@
-import {EdgeFeatureHubConfig} from "../../../../featurehub-io/sdks/typescript/featurehub-eventsource-sdk";
+import {EdgeFeatureHubConfig} from "featurehub-javascript-node-sdk";
 
 function getApplicationServerUrl(): string {
     let appUrl;
 
-    if (process.env.APP_SERVER_URL === undefined) {
-        console.error('You must define the Application server URL under test in the environment variable APP_SERVER_URL');
+    if (process.env.FEATUREHUB_EDGE_URL === undefined || process.env.FEATUREHUB_CLIENT_API_KEY === undefined) {
+        console.error('You must define the Application server URL under test in the environment variable FEATUREHUB_EDGE_URL and the API key in FEATUREHUB_CLIENT_API_KEY');
         process.exit(-1);
     } else appUrl = process.env.APP_SERVER_URL;
 
@@ -12,7 +12,7 @@ function getApplicationServerUrl(): string {
 }
 
 function getFhConfig(): EdgeFeatureHubConfig {
-    const fhConfig  = new EdgeFeatureHubConfig(process.env.FEATUREHUB_EDGE_URL, process.env.FEATUREHUB_API_KEY);
+    const fhConfig  = new EdgeFeatureHubConfig(process.env.FEATUREHUB_EDGE_URL, process.env.FEATUREHUB_CLIENT_API_KEY);
     fhConfig.init();
     return fhConfig;
 }

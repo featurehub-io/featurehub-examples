@@ -1,5 +1,5 @@
 import globalAxios from "axios";
-import { FeatureStateUpdate, FeatureUpdater, FeatureStateHolder } from "featurehub-eventsource-sdk";
+import { FeatureStateUpdate, FeatureUpdater, FeatureStateHolder } from "featurehub-javascript-node-sdk";
 import { Config } from "./config";
 import { expect } from "chai";
 import waitForExpect from "wait-for-expect";

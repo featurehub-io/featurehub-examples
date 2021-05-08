@@ -10,7 +10,7 @@
     "start": "npm run build && node --trace-warnings dist/app.js"
   },
   "dependencies": {
-    "featurehub-eventsource-sdk": "^2.0.1",
+    "featurehub-javascript-node-sdk": "^1.0.0",
     "restify": "^8.5.1",
     "restify-cors-middleware": "^1.1.1"
   },
