@@ -19,7 +19,7 @@ The SDK Examples consist of
 - link:todo-backend-java/README{outfilesuffix}[Java backend server]
 - link:sample-java-quarkus/README{outfilesuffix}[Java Quarkus server]
 - link:sample-java-springboot/README{outfilesuffix}[Java SpringBoot server]
-- link:todo-angular/angular-featurehub-app/README.md{outfilesuffix}[Angular app]
+- link:todo-angular/angular-featurehub-app/README.md[Angular app]
 - link:todo-backend-typescript/README{outfilesuffix}[Node server (Typescript)]
 - link:todo-frontend-react-typescript/README{outfilesuffix}[React app]
 - link:todo-frontend-react-typescript-catch-and-release/README{outfilesuffix}[React app with catch & release mode]
