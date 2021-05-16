@@ -8,7 +8,7 @@ It's an essential ingredient for enabling the feedback loop and feature testing 
 == Versions
 
 The master branch on this repository always reflects the functional master branch on the main `featurehub` repository.
-As such, if you are running against version (say) `0.0.7` of our Docker images, then you should download the
+As such, if you are running against version (say) `0.0.7` of our Docker images, then you should use the
 0.0.7+ of the https://github.com/featurehub-io/featurehub-examples/tags[examples].
 
 == The SDK Examples
@@ -17,20 +17,12 @@ The SDK Examples consist of
 
 - link:golang-service/README.md[Golang service example]
 - link:todo-backend-java/README{outfilesuffix}[Java backend server]
-- link:todo-backend-typescript/README{outfilesuffix}[Typescript backend server]
+- link:sample-java-quarkus/README{outfilesuffix}[Java Quarkus server]
+- link:sample-java-springboot/README{outfilesuffix}[Java SpringBoot server]
+- link:todo-angular/angular-featurehub-app/README{outfilesuffix}[Angular app]
+- link:todo-backend-typescript/README{outfilesuffix}[Node server (Typescript)]
 - link:todo-frontend-react-typescript/README{outfilesuffix}[React app]
 - link:todo-frontend-react-typescript-catch-and-release/README{outfilesuffix}[React app with catch & release mode]
 - link:todo-frontend-react-typescript-feature-override/README{outfilesuffix}[React app with features overrides]
 
 
-== Running from the Docker image
-
-The React app and Node JS server examples are available in the docker image.
-
-Please see our https://www.youtube.com/watch?v=DRVqXJmbvTk[Youtube Video] for details on how to run these in the Docker images.
-
-----
-docker run -e
-FEATUREHUB_APP_ENV_URL=http://192.168.86.49:8903/features/default/d8ba747d-7d3c-4454-9c58-130390848412/5EE3vua1NqY0ez6Zd4TXU7XnsZdAPHtR96XaDmhfegitKGiQ9aCdmtmeNUNPubkRZLJLUUpaC7b05ELk
--p 5000:5000  featurehub/example_node:1.1
-----
