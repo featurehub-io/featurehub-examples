@@ -5,7 +5,7 @@ import globalAxios from 'axios';
 import { ClientContext,
     EdgeFeatureHubConfig,
     Readyness,
-    FeatureHubEventSourceClient,
+    FeatureHubPollingClient,
     StrategyAttributeCountryName,
     GoogleAnalyticsCollector } from 'featurehub-javascript-client-sdk';
 
@@ -57,14 +57,24 @@ class App extends React.Component<{}, { todos: TodoData }> {
     }
 
     async initializeFeatureHub() {
-
+        if (fhConfig !== undefined) {
+          return;
+        }
         const config = (await globalAxios.request({url: 'featurehub-config.json'})).data as ConfigData;
         fhConfig = new EdgeFeatureHubConfig(config.fhEdgeUrl, config.fhApiKey);
+
+        // Setting “GET” polling mechanism to override SSE. Poll every 10 seconds… In production you would generally use
+        // 60 - 180 seconds. We avoid using the SSE client unless we can detect the difference between Mobile and Web.
+        // NOTE: Make sure you are running at least version 1.0.5 of the SDK. If you encounter a CORS issue, you can
+        //   override CORS headers with https://docs.featurehub.io/installation.html#_sse_edge_config and there is an
+        //   example here: https://github.com/featurehub-io/featurehub-install/blob/master/docker-compose-options/all-in-one-h2/app-config/application.properties
+        fhConfig.edgeServiceProvider((repo, c) =>
+          new FeatureHubPollingClient(repo, c, 10000));
 
         // connect to Google Analytics
         // fhConfig.addAnalyticCollector(new GoogleAnalyticsCollector('UA-1234', '1234-5678-abcd-1234'));
 
-        fhClient = await fhConfig.newContext().build();
+        fhClient = await fhConfig.newContext().userKey(user).build();
         fhConfig.addReadynessListener((readyness) => {
             if (!initialized) {
                 if (readyness === Readyness.Ready) {
