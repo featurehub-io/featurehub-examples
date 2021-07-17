@@ -165,6 +165,7 @@ process.on('SIGINT', () => {
 	console.log('closing FH client');
 	fhConfig.close();
 	api.close(() => console.log('Shut down server...'));
+	process.exit(0);
 });
 
 let initialized = false;
