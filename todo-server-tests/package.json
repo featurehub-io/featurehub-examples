@@ -12,7 +12,7 @@
     "@openapitools/openapi-generator-cli": "^2.2.6",
     "@types/node": "^14.14.31",
     "chai": "^4.3.0",
-    "featurehub-javascript-node-sdk": "^1.0.1",
+    "featurehub-javascript-node-sdk": "^1.0.5",
     "wait-for-expect": "^3.0.2"
   },
   "devDependencies": {

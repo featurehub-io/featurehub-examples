@@ -11,7 +11,7 @@ If "FEATURE_TITLE_TO_UPPERCASE" is enabled - it will convert todo 'title' proper
 
 If this feature is disabled it will have todo 'title' in whatever format it was sent when a todo was created.
 
-Uses the `client-typescript-eventsource` library.
+Uses the `featurehub-javascript-node-sdk` library.
 
 The app is based on the Open API description stored in todo-api folder, however Open API code generators are not used in this case
 
