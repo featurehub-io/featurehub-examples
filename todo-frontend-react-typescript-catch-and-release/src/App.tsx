@@ -89,7 +89,7 @@ class App extends React.Component<{}, { todos: TodoData }> {
         fhConfig.repository().catchAndReleaseMode = true; // catch feature updates and release later
 
         // Uncomment this if you want to use rollout strategy with a country rule
-        // fhClient
+        // await fhClient
         //     .country(StrategyAttributeCountryName.Australia)
         //     .build();
 

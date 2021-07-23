@@ -6,11 +6,10 @@
   "license": "MIT",
   "scripts": {
     "build": "node_modules/.bin/tsc",
-    "link": "npm link featurehub-repository && npm link featurehub-eventsource-sdk",
     "start": "npm run build && node --trace-warnings dist/app.js"
   },
   "dependencies": {
-    "featurehub-javascript-node-sdk": "^1.0.0",
+    "featurehub-javascript-node-sdk": "^1.0.5",
     "restify": "^8.5.1",
     "restify-cors-middleware": "^1.1.1"
   },
