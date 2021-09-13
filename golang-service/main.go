@@ -4,16 +4,17 @@ import (
 	"net/http"
 
 	"github.com/featurehub-io/featurehub-examples/golang-service/internal/handler"
-	"github.com/featurehub-io/featurehub/sdks/client-go"
-	"github.com/featurehub-io/featurehub/sdks/client-go/pkg/analytics"
+	client "github.com/featurehub-io/featurehub-go-sdk"
+	"github.com/featurehub-io/featurehub-go-sdk/pkg/analytics"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
 const (
 	listenAddress = ":8080"
-	sdkKey        = "default/2a059b65-e9ca-4889-9622-525af14301c7/xQTU7Ah1fjtSE3f5vK7fwLgNA6uBph4q56TPkYk9AUbWlX7usYc9d44FJI2HDByGoRWkV3ak5JknOVv8"
-	serverAddress = "http://localhost:8085"
+	logLevel      = logrus.TraceLevel
+	sdkKey        = "default/8c397b3e-6859-4d8e-b159-8aaa7612a15e/zdq34UE8I9qQzozdnHJxbAXfMNiXXV*GGVdiQoomNPKCchWWmMz"
+	serverAddress = "http://ballbag:8085"
 )
 
 func main() {
@@ -22,32 +23,25 @@ func main() {
 	logger := logrus.New()
 	logger.SetLevel(logrus.TraceLevel)
 
-	// Prepare a config for the FeatureHub client:
-	config := &client.Config{
-		SDKKey:        sdkKey,
-		ServerAddress: serverAddress,
-		WaitForData:   true,
-		LogLevel:      logrus.DebugLevel,
+	// Prepare a config:
+	fhConfig, err := client.New(serverAddress, sdkKey).WithLogLevel(logLevel).WithWaitForData(true).Connect()
+	if err != nil {
+		logrus.Fatalf("Error creating config")
 	}
 
-	// Attempt to make a new client:
-	fhClient, err := client.NewStreamingClient(config)
-	if err != nil {
-		logrus.Fatalf("Error connecting to FeatureHub: %s", err)
-	}
+	fhClient := fhConfig.NewContext()
 
 	// Configure a logging analytics collector:
 	fhClient.AddAnalyticsCollector(analytics.NewLoggingAnalyticsCollector(logger))
-
-	// Start receiving data from FeatureHub:
-	fhClient.Start()
 
 	// Prepare a turn.io handler using the recorder:
 	handler := handler.New(logger, fhClient)
 
 	// Prepare a MUX router:
 	router := mux.NewRouter()
-	router.HandleFunc("/hello", handler.Hello).Methods(http.MethodGet)
+	router.HandleFunc("/mapped", handler.Mapped).Methods(http.MethodGet)
+	router.HandleFunc("/random", handler.Random).Methods(http.MethodGet)
+	router.HandleFunc("/static", handler.Static).Methods(http.MethodGet)
 	http.Handle("/", router)
 
 	// Serve:
