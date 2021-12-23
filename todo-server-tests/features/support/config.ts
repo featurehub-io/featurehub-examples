@@ -1,4 +1,48 @@
 import {EdgeFeatureHubConfig} from "featurehub-javascript-node-sdk";
+import globalAxios, { AxiosResponse } from "axios";
+
+const responseProcessor = function (response: AxiosResponse) {
+  const reqConfig = response.config;
+  return {
+    type: 'response',
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+    data: response.data,
+    request: {
+      headers: reqConfig.headers,
+      method: reqConfig.method,
+      data: reqConfig.data,
+      url: reqConfig.url,
+    }
+  };
+};
+
+
+globalAxios.interceptors.request.use(reqConfig=> {
+  if (process.env.DEBUG) {
+    const req = {
+      type: 'request',
+      headers: reqConfig.headers,
+      method: reqConfig.method,
+      data: reqConfig.data,
+      url: reqConfig.url,
+    };
+
+    console.log('request: ', req);
+  }
+
+  return reqConfig;
+}); // log axios requests
+
+globalAxios.interceptors.response.use((resp: AxiosResponse) => {
+  if (process.env.DEBUG) {
+    const loginfo = responseProcessor(resp);
+    console.log('response: ', loginfo);
+  }
+  return resp;
+});
+
 
 function getApplicationServerUrl(): string {
     let appUrl;

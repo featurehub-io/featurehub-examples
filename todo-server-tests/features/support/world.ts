@@ -1,4 +1,4 @@
-import globalAxios from "axios";
+
 import { FeatureStateUpdate, FeatureUpdater, FeatureStateHolder } from "featurehub-javascript-node-sdk";
 import { Config } from "./config";
 import { expect } from "chai";
@@ -22,7 +22,6 @@ class CustomWorld {
     private response: boolean;
     constructor() {
         this.variable = 0;
-        globalAxios.interceptors.request.use(x=> {console.log(x); return x;}); // log axios requests
     }
 
     setUser(user) {

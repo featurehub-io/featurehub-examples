@@ -9,7 +9,7 @@
     "start": "npm run build && node --trace-warnings dist/app.js"
   },
   "dependencies": {
-    "featurehub-javascript-node-sdk": "^1.0.8",
+    "featurehub-javascript-node-sdk": "^1.0.9",
     "restify": "^8.5.1",
     "restify-cors-middleware": "^1.1.1"
   },
